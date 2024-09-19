@@ -30,8 +30,8 @@ export const addJob = async (req, res) => {
     const newJob = new Job({
       title,
       description,
-      userId: req.user.id,
-      image: {
+      userId: req.user._id, // Asumiendo que req.user contiene el usuario autenticado
+      profilePhoto: {
         data: file.buffer,
         contentType: file.mimetype,
       },
@@ -48,7 +48,9 @@ export const addJob = async (req, res) => {
         title: savedJob.title,
         description: savedJob.description,
         userId: savedJob.userId,
-        image: savedJob.image,
+        profilePhoto: {
+          contentType: savedJob.profilePhoto.contentType,
+        },
       },
     });
   } catch (error) {
@@ -56,3 +58,25 @@ export const addJob = async (req, res) => {
     return res.status(500).json({ message: "Error inesperado al agregar el trabajo." });
   }
 };
+
+export const getAllJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find().populate('userId', 'name');
+    
+    const jobsWithImages = jobs.map(job => ({
+      _id: job._id,
+      title: job.title,
+      description: job.description,
+      userName: job.userId ? job.userId.name : 'Usuario desconocido',
+      profilePhoto: job.profilePhoto && job.profilePhoto.data 
+        ? `data:${job.profilePhoto.contentType};base64,${job.profilePhoto.data.toString('base64')}`
+        : null
+    }));
+
+    res.json(jobsWithImages);
+  } catch (error) {
+    console.error("Error al obtener los trabajos:", error);
+    res.status(500).json({ message: "Error al obtener los trabajos" });
+  }
+};
+
