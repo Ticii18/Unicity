@@ -62,12 +62,13 @@ export const addJob = async (req, res) => {
 export const getAllJobs = async (req, res) => {
   try {
     const jobs = await Job.find().populate('userId', 'name');
-    
+
     const jobsWithImages = jobs.map(job => ({
-      _id: job._id,
+      _id: job._id.toString(), // Asegúrate de convertir el ID del trabajo a string
       title: job.title,
       description: job.description,
-      userName: job.userId ? job.userId.name : 'Usuario desconocido',
+      userId: job.userId._id.toString(), // Convertir el ID del usuario a string para evitar problemas de comparación
+      userName: job.userId.name,
       profilePhoto: job.profilePhoto && job.profilePhoto.data 
         ? `data:${job.profilePhoto.contentType};base64,${job.profilePhoto.data.toString('base64')}`
         : null
@@ -79,4 +80,35 @@ export const getAllJobs = async (req, res) => {
     res.status(500).json({ message: "Error al obtener los trabajos" });
   }
 };
+
+// Controlador para eliminar un trabajo
+// Controlador para eliminar un trabajo
+export const deleteJob = async (req, res) => {
+  try {
+    const { userId, jobId } = req.params;
+
+    // Verificar que el trabajo exista
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: 'Trabajo no encontrado' });
+    }
+
+    // Verificar que el usuario autenticado sea el dueño del trabajo
+    if (job.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'No tienes permiso para eliminar este trabajo' });
+    }
+
+    // Eliminar el trabajo usando findByIdAndDelete
+    await Job.findByIdAndDelete(jobId);
+
+    res.status(200).json({ message: 'Trabajo eliminado exitosamente' });
+
+  } catch (error) {
+    console.error('Error al eliminar el trabajo:', error);
+    res.status(500).json({ message: 'Error inesperado al eliminar el trabajo' });
+  }
+};
+
+
+
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addJob, getAllJobs } from "../controllers/jobs.controllers.js";
+import { addJob, getAllJobs, deleteJob } from "../controllers/jobs.controllers.js";
 import authMiddleware from "../middlewares/validar-jwt.js";
 import upload from "../helpers/multer.js";
 
@@ -11,6 +11,7 @@ todosRouter.get("/jobs", getAllJobs);
 // Rutas protegidas que requieren autenticación
 todosRouter.post("/add/:userId", authMiddleware, upload.single("image"), addJob);
 // todosRouter.put("/put/:id", authMiddleware, updateTask);
-// todosRouter.delete("/delete/:id", authMiddleware, deleteTask);
+todosRouter.delete("/delete/:userId/:jobId", authMiddleware, deleteJob);
+
 
 export { todosRouter };
