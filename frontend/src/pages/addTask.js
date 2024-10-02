@@ -105,7 +105,6 @@ export const addJobPage = () => {
       return;
     }
     const userId = localStorage.getItem("userId");
-
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -119,16 +118,17 @@ export const addJobPage = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Error al agregar el trabajo");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al agregar el trabajo");
       }
 
       const data = await response.json();
       console.log(data);
       window.alert("Trabajo agregado exitosamente");
-      window.location.pathname = "/";
+      window.location.pathname = "/"; // Redirige a la página principal después de agregar el trabajo
     } catch (error) {
       console.error("Error al agregar el trabajo:", error);
-      divError.innerText = "Error al agregar el trabajo.";
+      divError.innerText = error.message || "Error al agregar el trabajo.";
     }
   });
 

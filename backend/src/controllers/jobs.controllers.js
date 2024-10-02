@@ -30,8 +30,8 @@ export const addJob = async (req, res) => {
     const newJob = new Job({
       title,
       description,
-      userId: req.user.id,
-      image: {
+      userId: req.user._id, // Asumiendo que req.user contiene el usuario autenticado
+      profilePhoto: {
         data: file.buffer,
         contentType: file.mimetype,
       },
@@ -48,7 +48,9 @@ export const addJob = async (req, res) => {
         title: savedJob.title,
         description: savedJob.description,
         userId: savedJob.userId,
-        image: savedJob.image,
+        profilePhoto: {
+          contentType: savedJob.profilePhoto.contentType,
+        },
       },
     });
   } catch (error) {
@@ -56,3 +58,57 @@ export const addJob = async (req, res) => {
     return res.status(500).json({ message: "Error inesperado al agregar el trabajo." });
   }
 };
+
+export const getAllJobs = async (req, res) => {
+  try {
+    const jobs = await Job.find().populate('userId', 'name');
+
+    const jobsWithImages = jobs.map(job => ({
+      _id: job._id.toString(), // Asegúrate de convertir el ID del trabajo a string
+      title: job.title,
+      description: job.description,
+      userId: job.userId._id.toString(), // Convertir el ID del usuario a string para evitar problemas de comparación
+      userName: job.userId.name,
+      profilePhoto: job.profilePhoto && job.profilePhoto.data 
+        ? `data:${job.profilePhoto.contentType};base64,${job.profilePhoto.data.toString('base64')}`
+        : null
+    }));
+
+    res.json(jobsWithImages);
+  } catch (error) {
+    console.error("Error al obtener los trabajos:", error);
+    res.status(500).json({ message: "Error al obtener los trabajos" });
+  }
+};
+
+// Controlador para eliminar un trabajo
+// Controlador para eliminar un trabajo
+export const deleteJob = async (req, res) => {
+  try {
+    const { userId, jobId } = req.params;
+
+    // Verificar que el trabajo exista
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ message: 'Trabajo no encontrado' });
+    }
+
+    // Verificar que el usuario autenticado sea el dueño del trabajo
+    if (job.userId.toString() !== userId) {
+      return res.status(403).json({ message: 'No tienes permiso para eliminar este trabajo' });
+    }
+
+    // Eliminar el trabajo usando findByIdAndDelete
+    await Job.findByIdAndDelete(jobId);
+
+    res.status(200).json({ message: 'Trabajo eliminado exitosamente' });
+
+  } catch (error) {
+    console.error('Error al eliminar el trabajo:', error);
+    res.status(500).json({ message: 'Error inesperado al eliminar el trabajo' });
+  }
+};
+
+
+
+
