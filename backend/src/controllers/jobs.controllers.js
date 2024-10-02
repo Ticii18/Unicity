@@ -3,21 +3,25 @@ import Curriculum from '../models/jobs.model.js';
 // Crear un nuevo curriculum
 export const createCurriculum = async (req, res) => {
   try {
+
+    console.log("userId:", req.params.userId); // Verificar que userId es correcto
+    console.log("body:", req.body); // Verificar que los datos del formulario son correctos
+
     // Crear una nueva instancia del modelo con los datos del request
     const curriculumData = {
       userId: req.params.userId, // Almacenar el ID del creador
-      nombre: req.body.nombre,
-      profesion: req.body.profesion,
-      correo: req.body.correo,
-      telefono: req.body.telefono,
+      name: req.body.nombre,
+      profession: req.body.profesion,
+      email: req.body.correo,
+      phone: req.body.telefono,
       linkedin: req.body.linkedin,
-      sitioWeb: req.body.sitioWeb,
-      experiencia: {
-        empresa: req.body.empresa,
-        duracion: req.body.duracion,
-        descripcionPuesto: req.body.descripcionPuesto,
+      website: req.body.sitioWeb,
+      experience: {
+        company: req.body.empresa,
+        duration: req.body.duracion,
+        jobDescription: req.body.descripcionPuesto,
       },
-      habilidades: [req.body.habilidad1, req.body.habilidad2],
+      skills: [req.body.habilidad1, req.body.habilidad2],
       trabajosAnteriores: {
         imagen1: req.file ? req.file.path : null, // Usar la ruta de la imagen subida
       },
