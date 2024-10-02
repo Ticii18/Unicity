@@ -10,11 +10,11 @@ export async function validateSession() {
       return { 
         valid: true, 
         userId: data.userId,
-        username: data.username // Cambiado de userName a username
+        username: data.username
       };
     } else if (response.status === 403) {
       console.log('Sesión no válida o expirada');
-      return { valid: false };
+      return { valid: false }; // Manejar esta respuesta en el frontend
     } else {
       console.error('Error inesperado al validar la sesión:', response.statusText);
       return { valid: false };

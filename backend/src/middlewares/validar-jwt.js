@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { SECRET_KEY } from '../config/env.js';
-import User from '../models/user.model.js'; // Asegúrate de importar tu modelo de usuario
+import User from '../models/user.model.js';
 
 export default async (req, res, next) => {
   const token = req.cookies.authToken || req.session.token;

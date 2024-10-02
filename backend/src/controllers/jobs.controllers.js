@@ -1,114 +1,127 @@
-import connectDB from "../db/database.js";
-import Job from "../models/jobs.model.js";
+import Curriculum from '../models/jobs.model.js'; 
 
-// Controlador para agregar un trabajo
-export const addJob = async (req, res) => {
+// Crear un nuevo curriculum
+export const createCurriculum = async (req, res) => {
   try {
-    // Conectar a la base de datos
-    await connectDB();
-
-    // Obtener el título, la descripción, y el archivo de la solicitud
-    const { title, description } = req.body;
-    const file = req.file;
-
-    // Validar que el usuario esté autenticado
-    if (!req.user) {
-      return res.status(401).json({ message: "Usuario no autenticado." });
-    }
-
-    // Validar que se proporcionaron todos los campos requeridos
-    if (!title || !description) {
-      return res.status(400).json({ message: "El título y la descripción son obligatorios." });
-    }
-
-    // Validar que el archivo esté presente y sea una imagen
-    if (!file) {
-      return res.status(400).json({ message: "La imagen es obligatoria." });
-    }
-
-    // Crear un nuevo trabajo usando el modelo Job
-    const newJob = new Job({
-      title,
-      description,
-      userId: req.user._id, // Asumiendo que req.user contiene el usuario autenticado
-      profilePhoto: {
-        data: file.buffer,
-        contentType: file.mimetype,
+    // Crear una nueva instancia del modelo con los datos del request
+    const curriculumData = {
+      userId: req.params.userId, // Almacenar el ID del creador
+      nombre: req.body.nombre,
+      profesion: req.body.profesion,
+      correo: req.body.correo,
+      telefono: req.body.telefono,
+      linkedin: req.body.linkedin,
+      sitioWeb: req.body.sitioWeb,
+      experiencia: {
+        empresa: req.body.empresa,
+        duracion: req.body.duracion,
+        descripcionPuesto: req.body.descripcionPuesto,
       },
-    });
+      habilidades: [req.body.habilidad1, req.body.habilidad2],
+      trabajosAnteriores: {
+        imagen1: req.file ? req.file.path : null, // Usar la ruta de la imagen subida
+      },
+    };
 
-    // Guardar el trabajo en la base de datos
-    const savedJob = await newJob.save();
+    const curriculum = new Curriculum(curriculumData);
+    const savedCurriculum = await curriculum.save();
 
-    // Enviar una respuesta con el trabajo creado
     return res.status(201).json({
-      message: "Trabajo agregado exitosamente.",
-      job: {
-        id: savedJob._id,
-        title: savedJob.title,
-        description: savedJob.description,
-        userId: savedJob.userId,
-        profilePhoto: {
-          contentType: savedJob.profilePhoto.contentType,
-        },
-      },
+      message: 'Curriculum creado con éxito',
+      curriculum: savedCurriculum,
     });
   } catch (error) {
-    console.error("Error al agregar el trabajo:", error);
-    return res.status(500).json({ message: "Error inesperado al agregar el trabajo." });
+    console.error("Error al crear curriculum:", error);
+    return res.status(500).json({ message: 'Error al crear el curriculum', error });
   }
 };
 
-export const getAllJobs = async (req, res) => {
+// Obtener un curriculum por ID
+export const getCurriculumById = async (req, res) => {
   try {
-    const jobs = await Job.find().populate('userId', 'name');
-
-    const jobsWithImages = jobs.map(job => ({
-      _id: job._id.toString(), // Asegúrate de convertir el ID del trabajo a string
-      title: job.title,
-      description: job.description,
-      userId: job.userId._id.toString(), // Convertir el ID del usuario a string para evitar problemas de comparación
-      userName: job.userId.name,
-      profilePhoto: job.profilePhoto && job.profilePhoto.data 
-        ? `data:${job.profilePhoto.contentType};base64,${job.profilePhoto.data.toString('base64')}`
-        : null
-    }));
-
-    res.json(jobsWithImages);
-  } catch (error) {
-    console.error("Error al obtener los trabajos:", error);
-    res.status(500).json({ message: "Error al obtener los trabajos" });
-  }
-};
-
-// Controlador para eliminar un trabajo
-// Controlador para eliminar un trabajo
-export const deleteJob = async (req, res) => {
-  try {
-    const { userId, jobId } = req.params;
-
-    // Verificar que el trabajo exista
-    const job = await Job.findById(jobId);
-    if (!job) {
-      return res.status(404).json({ message: 'Trabajo no encontrado' });
+    const curriculumId = req.params.id;
+    const curriculum = await Curriculum.findById(curriculumId); // Asegúrate de usar el modelo Curriculum
+    
+    if (!curriculum) {
+      return res.status(404).json({ message: 'Curriculum no encontrado' });
     }
 
-    // Verificar que el usuario autenticado sea el dueño del trabajo
-    if (job.userId.toString() !== userId) {
-      return res.status(403).json({ message: 'No tienes permiso para eliminar este trabajo' });
-    }
-
-    // Eliminar el trabajo usando findByIdAndDelete
-    await Job.findByIdAndDelete(jobId);
-
-    res.status(200).json({ message: 'Trabajo eliminado exitosamente' });
-
+    return res.status(200).json(curriculum);
   } catch (error) {
-    console.error('Error al eliminar el trabajo:', error);
-    res.status(500).json({ message: 'Error inesperado al eliminar el trabajo' });
+    console.error("Error al obtener curriculum:", error);
+    return res.status(500).json({ message: 'Error al obtener el curriculum', error });
   }
 };
 
+// Obtener todos los curriculums de un usuario
+export const getAllCurriculums = async (req, res) => {
+  try {
+    const curriculums = await Curriculum.find();
+    res.json(curriculums);
+  } catch (error) {
+    console.error('Error al obtener los curriculums:', error);
+    res.status(500).json({ message: 'Error al obtener los curriculums', error: error.message });
+  }
+};
 
+// Actualizar un curriculum
+export const updateCurriculum = async (req, res) => {
+  try {
+    const curriculumId = req.params.id;
 
+    const curriculumData = {
+      nombre: req.body.nombre,
+      profesion: req.body.profesion,
+      correo: req.body.correo,
+      telefono: req.body.telefono,
+      linkedin: req.body.linkedin,
+      sitioWeb: req.body.sitioWeb,
+      experiencia: {
+        empresa: req.body.empresa,
+        duracion: req.body.duracion,
+        descripcionPuesto: req.body.descripcionPuesto,
+      },
+      habilidades: [req.body.habilidad1, req.body.habilidad2],
+      trabajosAnteriores: {
+        imagen1: req.file ? req.file.path : null, // Usar la ruta de la imagen subida
+      },
+    };
 
+    const updatedCurriculum = await Curriculum.findByIdAndUpdate(curriculumId, curriculumData, {
+      new: true, // Devuelve el documento actualizado
+      runValidators: true, // Aplica validaciones del esquema
+    });
+
+    if (!updatedCurriculum) {
+      return res.status(404).json({ message: 'Curriculum no encontrado' });
+    }
+
+    return res.status(200).json({
+      message: 'Curriculum actualizado con éxito',
+      curriculum: updatedCurriculum,
+    });
+  } catch (error) {
+    console.error("Error al actualizar curriculum:", error);
+    return res.status(500).json({ message: 'Error al actualizar el curriculum', error });
+  }
+};
+
+// Eliminar un curriculum
+export const deleteCurriculum = async (req, res) => {
+  try {
+    const curriculumId = req.params.curriculumId; // Obtener el curriculumId de los parámetros
+    const deletedCurriculum = await Curriculum.findByIdAndDelete(curriculumId);
+
+    if (!deletedCurriculum) {
+      return res.status(404).json({ message: 'Curriculum no encontrado' });
+    }
+
+    return res.status(200).json({
+      message: 'Curriculum eliminado con éxito',
+      curriculum: deletedCurriculum,
+    });
+  } catch (error) {
+    console.error("Error al eliminar curriculum:", error);
+    return res.status(500).json({ message: 'Error al eliminar el curriculum', error });
+  }
+};

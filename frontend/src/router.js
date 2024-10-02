@@ -1,11 +1,11 @@
-import { loginPage } from "./pages/loginPage";
-import { homePage } from "./pages/homePage";
-import { todosPage } from "./pages/todosPage";
-import { addJobPage } from "./pages/addTask";
-import { registerPage } from "./pages/registerUser";
-import { validateSession } from "./helpers/validateSession";
-import { Header } from "./components/header";
-import { Footer } from "./components/footer";
+import { loginPage } from "./pages/loginPage.js";
+import { homePage } from "./pages/homePage.js";
+import { todosPage } from "./pages/todosPage.js";
+import { curriculumPage } from "./pages/addJob.js"; // Asegúrate de que el nombre del archivo sea correcto
+import { registerPage } from "./pages/registerUser.js";
+import { validateSession } from "./helpers/validateSession.js";
+import { Header } from "./components/header.js";
+import { Footer } from "./components/footer.js";
 
 export async function router(path, app) {
   // Validar sesión para rutas protegidas
@@ -21,39 +21,43 @@ export async function router(path, app) {
   // Limpia el contenido previo
   app.innerHTML = '';
 
-  // Agrega el encabezado y pie de página
-  app.appendChild(await Header()); // Asegúrate de que Header() devuelva un nodo válido
+  // Agregar el Header al DOM
+  app.appendChild(await Header());
 
   let page;
 
-  // Usar await si las funciones de las páginas son asincrónicas
   switch (path) {
     case "/":
-      page = await homePage();
+      page = await homePage(); // Asegúrate de que homePage devuelva una promesa
       break;
     case "/login":
-      page = await loginPage();
+      page = await loginPage(); // Asegúrate de que loginPage devuelva una promesa
       break;
     case "/todos":
-      page = await todosPage();
+      page = await todosPage(); // Asegúrate de que todosPage devuelva una promesa
       break;
     case "/todos/add":
-      page = await addJobPage(); // Asegúrate de que este sea el nombre correcto
+      page = await curriculumPage(); // Asegúrate de que curriculumPage devuelva una promesa
       break;
     case "/register":
-      page = await registerPage();
+      page = await registerPage(); // Asegúrate de que registerPage devuelva una promesa
       break;
     default:
       page = document.createElement("div");
-      page.textContent = "Página no encontrada";
+      page.textContent = "404 - Página no encontrada";
+      break;
   }
 
-  // Verificar si la variable page es un nodo válido antes de agregarla
+  // Asegúrate de que page sea un nodo DOM válido
   if (page instanceof Node) {
     app.appendChild(page);
   } else {
-    console.error("El contenido de la página no es un nodo válido.", page);
+    console.error("La página no devolvió un nodo DOM válido:", page);
+    const errorElement = document.createElement('div');
+    errorElement.textContent = "Error al cargar la página";
+    app.appendChild(errorElement);
   }
 
-  app.appendChild(Footer()); // Asegúrate de que Footer() devuelva un nodo válido
+  // Agregar el Footer al DOM
+  app.appendChild(await Footer());
 }

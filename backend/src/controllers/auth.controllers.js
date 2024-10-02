@@ -52,30 +52,26 @@ export const signInCtrl = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Conectar a la base de datos
     await connectDB();
-
-    // Buscar el usuario por su nombre de usuario
     const user = await User.findOne({ username });
 
     if (!user) {
       return res.status(401).json({ message: "Credenciales incorrectas" });
     }
 
-    // Verificar la contraseña
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Credenciales incorrectas" });
     }
 
-    // Generar JWT
-    const token = await generarJwt(user.id);
+    // Generar el JWT
+    const token = await generarJwt(user.id); // Asegúrate de que esto esté funcionando
 
-    // Guardar el token en la sesión y cookie
+    // Guardar el token en la sesión y la cookie
     req.session.token = token;
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: false,
+      secure: false, // Cambia a true si usas HTTPS
       maxAge: 3600000, // 1 hora
     });
 
@@ -88,6 +84,7 @@ export const signInCtrl = async (req, res) => {
     return res.status(500).json({ message: "Error Inesperado" });
   }
 };
+
 
 // Controlador para cerrar sesión
 export const signOutCtrl = (req, res) => {
@@ -109,7 +106,11 @@ export const signOutCtrl = (req, res) => {
 // Controlador para validar sesión
 export const validateSessionCtrl = async (req, res) => {
   try {
-    // Asumiendo que req.user contiene la información del usuario autenticado
+    // Asegúrate de que req.user contenga la información del usuario autenticado
+    if (!req.user) {
+      return res.status(403).json({ message: 'No autorizado' });
+    }
+    
     res.json({
       userId: req.user._id, // Asumiendo que _id es el identificador único
       username: req.user.username

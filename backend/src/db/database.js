@@ -1,9 +1,7 @@
-// db.js
-
 import { connect } from 'mongoose';
 
 // URL de conexión a MongoDB. Cambia 'myDatabase' por el nombre de tu base de datos.
-const mongoURI = 'mongodb://localhost/unicity';
+const mongoURI = 'mongodb+srv://ticianovera22:tici123@unicity.zkt17.mongodb.net/unicity';
 
 // Función para conectar a MongoDB
 const connectDB = async () => {

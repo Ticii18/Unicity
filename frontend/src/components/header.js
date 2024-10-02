@@ -20,7 +20,7 @@ export async function Header() {
       <span id="user-name" class="text-lg font-semibold">${isLoggedIn ? sessionStatus.username : 'Invitado'}</span>
       ${isLoggedIn
       ? `<button id="logout" class="bg-red-500 px-4 py-2 rounded-full text-white">Salir</button>
-         <button id="add-task" class="bg-green-500 px-4 py-2 rounded-full text-white">Agregar Tarea</button>`
+         <button id="add-task" class="bg-green-500 px-4 py-2 rounded-full text-white">Cargar perfil</button>`
       : `<button id="login" class="bg-green-500 px-4 py-2 rounded-full text-white">Iniciar Sesión</button>`
     }
     </div>

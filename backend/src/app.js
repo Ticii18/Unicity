@@ -4,9 +4,10 @@ import session from 'express-session';
 import cors from 'cors';
 import morgan from 'morgan';
 import connectDB from './db/database.js';
-import { PORT } from './config/env.js';
+import { PORT, SECRET_KEY } from './config/env.js';
 import { authRouter } from './routes/auth.routes.js';
-import { todosRouter } from './routes/todos.routes.js';
+import { jobsRoutes } from './routes/jobs.routes.js';
+import authMiddleware from './middlewares/validar-jwt.js';
 
 const app = express();
 
@@ -26,14 +27,14 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
-  secret: 'session_secret_key', // Cambia esto por una clave secreta en producción
+  secret: SECRET_KEY,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }, // Cambia a 'true' si usas HTTPS
+  cookie: { secure: false }, // Change to 'true' if using HTTPS
 }));
 
 app.use('/auth', authRouter);
-app.use('/todos', todosRouter);
+app.use('/todos', authMiddleware, jobsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);

@@ -7,9 +7,7 @@ export default (userId) => {
     jwt.sign(
       payload,
       SECRET_KEY,
-      {
-        expiresIn: "4h",
-      },
+      { expiresIn: "4h" },
       (error, token) => {
         if (error) {
           console.log(error);
