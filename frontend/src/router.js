@@ -21,26 +21,28 @@ export async function router(path, app) {
   // Limpia el contenido previo
   app.innerHTML = '';
 
-  // Agregar el Header al DOM
-  app.appendChild(await Header());
+  // Agregar el Header al DOM solo si la ruta no es "/todos/add"
+  if (path !== "/todos/add") {
+    app.appendChild(await Header());
+  }
 
   let page;
 
   switch (path) {
     case "/":
-      page = await homePage(); // Asegúrate de que homePage devuelva una promesa
+      page = await homePage(); 
       break;
     case "/login":
-      page = await loginPage(); // Asegúrate de que loginPage devuelva una promesa
+      page = await loginPage(); 
       break;
     case "/todos":
-      page = await todosPage(); // Asegúrate de que todosPage devuelva una promesa
+      page = await todosPage(); 
       break;
     case "/todos/add":
-      page = await curriculumPage(); // Asegúrate de que curriculumPage devuelva una promesa
+      page = await curriculumPage(); 
       break;
     case "/register":
-      page = await registerPage(); // Asegúrate de que registerPage devuelva una promesa
+      page = await registerPage(); 
       break;
     default:
       page = document.createElement("div");

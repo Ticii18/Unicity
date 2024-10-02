@@ -4,7 +4,7 @@ export const curriculumPage = () => {
 
   // Botón para volver al inicio
   const homeButton = document.createElement("a");
-  homeButton.href = "index.html";
+  homeButton.href = "/";
   homeButton.classList.add(
     "fixed",
     "top-4",
@@ -239,18 +239,16 @@ export const curriculumPage = () => {
     e.preventDefault();
   
     const formData = new FormData(form);
-    const formDataObj = Object.fromEntries(formData.entries()); // Convertir FormData a objeto
-
   
     const userId = localStorage.getItem("userId");
   
     try {
       const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
         method: "POST",
-        body: JSON.stringify(formDataObj),
+        body: formData,
         credentials: 'include',
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "aplication/json",
         },
         
 
