@@ -39,6 +39,8 @@ export const curriculumPage = () => {
   const fotoInput = document.createElement("input");
   fotoInput.type = "file";
   fotoInput.id = "fotoPerfil";
+  fotoInput.name = "image"; // Cambiado el name a "image" para que coincida con multer
+  fotoInput.accept = "image/*"; // Asegúrate de que solo se acepten imágenes
   fotoInput.classList.add(
     "block",
     "mx-auto",
@@ -175,23 +177,7 @@ export const curriculumPage = () => {
 
   experienceSection.appendChild(addInputField("Empresa:", "Nombre de la empresa", "empresa"));
   experienceSection.appendChild(addInputField("Duración:", "Duración del empleo", "duracion"));
-
-  const descriptionTextarea = document.createElement("textarea");
-  descriptionTextarea.placeholder = "Describe tus responsabilidades";
-  descriptionTextarea.name = "descripcionPuesto";
-  descriptionTextarea.classList.add(
-    "block",
-    "w-full",
-    "mt-2",
-    "p-2",
-    "border-2",
-    "border-gray-300",
-    "rounded-lg",
-    "text-gray-600"
-  );
-  descriptionTextarea.rows = 4;
-
-  experienceSection.appendChild(descriptionTextarea);
+  experienceSection.appendChild(addInputField("Descripción del Puesto:", "Descripción de tus funciones", "descripcionPuesto"));
 
   form.appendChild(experienceSection);
 
@@ -213,59 +199,49 @@ export const curriculumPage = () => {
   skillsTitle.textContent = "Habilidades";
   skillsSection.appendChild(skillsTitle);
 
-  skillsSection.appendChild(addInputField("Habilidad 1:", "Escribe una habilidad", "habilidad1"));
-  skillsSection.appendChild(addInputField("Habilidad 2:", "Escribe otra habilidad", "habilidad2"));
+  skillsSection.appendChild(addInputField("Habilidad 1:", "Escribe tu primera habilidad", "habilidad1"));
+  skillsSection.appendChild(addInputField("Habilidad 2:", "Escribe tu segunda habilidad", "habilidad2"));
 
   form.appendChild(skillsSection);
 
-  // Botón de enviar
+  // Botón de Enviar
   const submitButton = document.createElement("button");
   submitButton.type = "submit";
+  submitButton.textContent = "Guardar Currículum";
   submitButton.classList.add(
     "bg-blue-500",
     "text-white",
     "py-2",
     "px-4",
+    "mt-4",
     "rounded",
     "hover:bg-blue-700",
-    "transition",
-    "mt-4"
+    "transition"
   );
-  submitButton.textContent = "Enviar";
+
   form.appendChild(submitButton);
   container.appendChild(form);
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-  
-    const formData = new FormData(form);
-  
-    const userId = localStorage.getItem("userId");
-  
-    try {
-      const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
-        method: "POST",
-        body: formData,
-        credentials: 'include',
-        headers: {
-          "Content-Type": "aplication/json",
-        },
-        
+  // Manejar el evento de envío del formulario
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form); // Crear un FormData para enviar archivos
+    const userId = localStorage.getItem("userId"); // Asegúrate de que esto sea correcto
 
-      });
-  
-      if (response.ok) {
-        alert("Curriculum enviado correctamente");
-        form.reset();
-      } else {
-        const errorData = await response.json();
-        console.log(formData);
-        alert(`Error al enviar el currículum: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error("Error al enviar el currículum:", error);
-      alert("Ocurrió un error al enviar el formulario");
+    const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      alert("Currículum guardado con éxito.");
+      // Aquí puedes redirigir o actualizar la vista
+    } else {
+      const errorData = await response.json();
+      alert(`Error: ${errorData.message}`);
     }
   });
-  return container; 
+
+  return container;
 };

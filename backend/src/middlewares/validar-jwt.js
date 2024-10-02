@@ -3,6 +3,11 @@ import { SECRET_KEY } from '../config/env.js';
 import User from '../models/user.model.js';
 
 export default async (req, res, next) => {
+  // Permitir acceso público a la ruta "/jobs" en método GET
+  if (req.path === "/jobs" && req.method === "GET") {
+    return next(); // Permitir el acceso sin autenticación
+  }
+
   const token = req.cookies.authToken || req.session.token;
 
   if (!token) {
@@ -16,7 +21,7 @@ export default async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
-    req.user = user; // Esto adjunta todo el documento del usuario a req.user
+    req.user = user; // Adjuntar el documento del usuario en req.user
     next();
   } catch (error) {
     console.error('Error al verificar el token:', error);
