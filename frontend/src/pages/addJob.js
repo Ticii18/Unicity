@@ -239,16 +239,18 @@ export const curriculumPage = () => {
     e.preventDefault();
   
     const formData = new FormData(form);
+    const formDataObj = Object.fromEntries(formData.entries()); // Convertir FormData a objeto
+
   
     const userId = localStorage.getItem("userId");
   
     try {
       const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
         method: "POST",
-        body: formData,
+        body: JSON.stringify(formDataObj),
         credentials: 'include',
         headers: {
-          "Content-Type": "aplication/json",
+          "Content-Type": "application/json",
         },
         
 
@@ -257,6 +259,7 @@ export const curriculumPage = () => {
       if (response.ok) {
         alert("Curriculum enviado correctamente");
         form.reset();
+        window.location.href = '/'
       } else {
         const errorData = await response.json();
         console.log(formData);

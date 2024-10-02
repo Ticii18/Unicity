@@ -31,7 +31,7 @@ export async function homePage() {
     }
     
     const jobsHTML = jobs.map(job => `
-      <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl">
+      <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${job._id}">
         <img src="${job.profilePhoto || 'placeholder.jpg'}" alt="${job.title}" class="w-full h-60 object-cover rounded-3xl mb-2" />
         <h3 class="text-xl text-gray-800 mb-2">${job.userName || 'Usuario'}</h3>
         <p class="text-gray-600 mb-4">${job.title}</p>
@@ -44,13 +44,58 @@ export async function homePage() {
     $principal.innerHTML = `<section class="flex flex-wrap justify-around my-10">${jobsHTML}</section>`;
     
     // Agregar el event listener para eliminar trabajos
+    
+    // UNA MANERA DE ELIMINAR EL PERFIL Y RECARGAR LA PÁGINA AUTOMÁTICAMENTE
+
     $principal.querySelectorAll('.delete-job-btn').forEach(button => {
       button.addEventListener('click', function() {
         const userId = this.getAttribute('data-user-id');
         const jobId = this.getAttribute('data-job-id');
-        deleteJobs(userId, jobId);
+        fetch(`http://localhost:4000/todos/delete/${jobId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+          body: JSON.stringify({ userId }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }).then(response => {
+          if (response.ok) {
+            window.alert('Perfil eliminado');
+            location.reload(); // Recargar la página
+          } else {
+            window.alert('Error al eliminar el perfil');
+          }
+        });
       });
     });
+    
+    // SEGUNDA FORMA DE ELIMINAR EL PERFIL
+    // $principal.querySelectorAll('.delete-job-btn').forEach(button => {
+    //   button.addEventListener('click', function() {
+    //     const userId = this.getAttribute('data-user-id');
+    //     const jobId = this.getAttribute('data-job-id');
+    //     const jobElement = this.closest('.job-element'); // Obtener el elemento contenedor del trabajo
+    
+    //     fetch(`http://localhost:4000/todos/delete/${jobId}`, {
+    //       method: 'DELETE',
+    //       credentials: 'include',
+    //       body: JSON.stringify({ userId }),
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //     }).then(response => {
+    //       if (response.ok) {
+    //         window.alert('Perfil eliminado');
+    //         jobElement.remove(); // Eliminar el elemento del DOM
+    //       } else {
+    //         window.alert('Error al eliminar el perfil');
+    //       }
+    //     }).catch(error => {
+    //       console.error("Error al eliminar el perfil:", error);
+    //       window.alert('Ocurrió un error al intentar eliminar el perfil');
+    //     });
+    //   });
+    // });
 
   } catch (error) {
     console.error('Error al obtener los trabajos:', error);

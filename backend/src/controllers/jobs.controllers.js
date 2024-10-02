@@ -22,8 +22,9 @@ export const createCurriculum = async (req, res) => {
         jobDescription: req.body.descripcionPuesto,
       },
       skills: [req.body.habilidad1, req.body.habilidad2],
-      trabajosAnteriores: {
-        imagen1: req.file ? req.file.path : null, // Usar la ruta de la imagen subida
+      profilePhoto: {
+        data: req.file ? req.file.buffer : null,
+        contentType: req.file ? req.file.mimetype : null, 
       },
     };
 
