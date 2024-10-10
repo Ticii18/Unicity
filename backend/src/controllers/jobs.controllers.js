@@ -3,9 +3,13 @@ import Curriculum from '../models/jobs.model.js';
 // Crear un nuevo curriculum
 export const createCurriculum = async (req, res) => {
   try {
-
     console.log("userId:", req.params.userId); // Verificar que userId es correcto
     console.log("body:", req.body); // Verificar que los datos del formulario son correctos
+
+    // Verificar que se haya enviado la foto de perfil
+    if (!req.file) {
+      return res.status(400).json({ message: "La foto de perfil es obligatoria." });
+    }
 
     // Crear una nueva instancia del modelo con los datos del request
     const curriculumData = {
@@ -23,23 +27,21 @@ export const createCurriculum = async (req, res) => {
       },
       skills: [req.body.habilidad1, req.body.habilidad2],
       profilePhoto: {
-        data: req.file ? req.file.buffer : null,
-        contentType: req.file ? req.file.mimetype : null, 
+        data: req.file.buffer,
+        contentType: req.file.mimetype, 
       },
     };
 
-    const curriculum = new Curriculum(curriculumData);
-    const savedCurriculum = await curriculum.save();
+    // Guardar curriculumData en la base de datos
+    const newCurriculum = await Curriculum.create(curriculumData);
+    res.status(201).json(newCurriculum); // Responder con el currículum creado
 
-    return res.status(201).json({
-      message: 'Curriculum creado con éxito',
-      curriculum: savedCurriculum,
-    });
   } catch (error) {
-    console.error("Error al crear curriculum:", error);
-    return res.status(500).json({ message: 'Error al crear el curriculum', error });
+    console.error("Error al crear el currículum:", error);
+    res.status(500).json({ message: "Error al crear el currículum" });
   }
 };
+
 
 // Obtener un curriculum por ID
 export const getCurriculumById = async (req, res) => {
@@ -61,36 +63,55 @@ export const getCurriculumById = async (req, res) => {
 // Obtener todos los curriculums de un usuario
 export const getAllCurriculums = async (req, res) => {
   try {
-    const curriculums = await Curriculum.find();
-    res.json(curriculums);
+    const curriculums = await Curriculum.find(); 
+
+    const curriculumsWithBase64Image = curriculums.map(curriculum => {
+      const curriculumObject = curriculum.toObject();
+
+      // Convertir imagen en base64 si existe
+      if (curriculumObject.profilePhoto && curriculumObject.profilePhoto.data) {
+        curriculumObject.profilePhoto.data = curriculumObject.profilePhoto.data.toString('base64');
+      }
+
+      return curriculumObject; 
+    });
+
+    res.json(curriculumsWithBase64Image);
   } catch (error) {
     console.error('Error al obtener los curriculums:', error);
     res.status(500).json({ message: 'Error al obtener los curriculums', error: error.message });
   }
 };
 
+
 // Actualizar un curriculum
+
 export const updateCurriculum = async (req, res) => {
   try {
     const curriculumId = req.params.id;
 
     const curriculumData = {
-      nombre: req.body.nombre,
-      profesion: req.body.profesion,
-      correo: req.body.correo,
-      telefono: req.body.telefono,
+      name: req.body.nombre,
+      profession: req.body.profesion,
+      email: req.body.correo,
+      phone: req.body.telefono,
       linkedin: req.body.linkedin,
-      sitioWeb: req.body.sitioWeb,
-      experiencia: {
-        empresa: req.body.empresa,
-        duracion: req.body.duracion,
-        descripcionPuesto: req.body.descripcionPuesto,
+      website: req.body.sitioWeb,
+      experience: {
+        company: req.body.empresa,
+        duration: req.body.duracion,
+        jobDescription: req.body.descripcionPuesto,
       },
-      habilidades: [req.body.habilidad1, req.body.habilidad2],
-      trabajosAnteriores: {
-        imagen1: req.file ? req.file.path : null, // Usar la ruta de la imagen subida
-      },
+      skills: [req.body.habilidad1, req.body.habilidad2],
     };
+
+    // Si se subió una nueva imagen, añadirla al curriculumData
+    if (req.file) {
+      curriculumData.profilePhoto = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
 
     const updatedCurriculum = await Curriculum.findByIdAndUpdate(curriculumId, curriculumData, {
       new: true, // Devuelve el documento actualizado
@@ -110,6 +131,7 @@ export const updateCurriculum = async (req, res) => {
     return res.status(500).json({ message: 'Error al actualizar el curriculum', error });
   }
 };
+
 
 // Eliminar un curriculum
 export const deleteCurriculum = async (req, res) => {
