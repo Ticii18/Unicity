@@ -14,19 +14,15 @@ const jobsRoutes = Router();
 // Ruta pública para obtener todos los curriculums
 jobsRoutes.get("/jobs", getAllCurriculums);
 
-// Middleware de autenticación para las rutas protegidas
-jobsRoutes.use(authMiddleware);
-
-// Ruta para crear un nuevo curriculum (protegida)
-jobsRoutes.post("/add/:userId", upload.single("image"), createCurriculum);
-
 // Ruta para obtener un curriculum específico por ID (protegida)
 jobsRoutes.get("/:id", getCurriculumById);
+// Ruta para crear un nuevo curriculum (protegida)
+jobsRoutes.post("/add/:userId",authMiddleware, upload.single("image"), createCurriculum);
 
 // Ruta para actualizar un curriculum (protegida)
-jobsRoutes.put("/update/:id", upload.single("image"), updateCurriculum);
+jobsRoutes.put("/update/:id",authMiddleware, upload.single("image"), updateCurriculum);
 
 // Ruta para eliminar un curriculum (protegida)
-jobsRoutes.delete("/delete/:curriculumId", deleteCurriculum);
+jobsRoutes.delete("/delete/:curriculumId",authMiddleware, deleteCurriculum);
 
 export { jobsRoutes };

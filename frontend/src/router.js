@@ -6,14 +6,16 @@ import { registerPage } from "./pages/registerUser.js";
 import { validateSession } from "./helpers/validateSession.js";
 import { Header } from "./components/header.js";
 import { Footer } from "./components/footer.js";
+import { viewPage } from "./pages/viewJob.js";
 
 export async function router(path, app) {
   // Validar sesión para rutas protegidas
-  if (path !== "/" && path !== "/login" && path !== "/register") {
+  if (path !== "/" && path !== "/employee" && path !== "/login" && path !== "/register") {
     const result = await validateSession();
 
     if (!result.valid) {
-      window.location.pathname = "/"; // Redirige a la página de inicio si no está autenticado
+      // Redirigir a la página de inicio si no está autenticado
+      window.location.pathname = "/";
       return;
     }
   }
@@ -22,7 +24,7 @@ export async function router(path, app) {
   app.innerHTML = '';
 
   // Agregar el Header al DOM solo si la ruta no es "/todos/add"
-  if (path !== "/todos/add") {
+  if (path !== "/todos/add" && path !== "/employee") {
     app.appendChild(await Header());
   }
 
@@ -41,6 +43,9 @@ export async function router(path, app) {
     case "/todos/add":
       page = await curriculumPage(); 
       break;
+    case "/employee":
+      page = await viewPage(); // Asegúrate de agregar un break aquí si decides hacer más lógica
+      break; // Se agregó el break aquí
     case "/register":
       page = await registerPage(); 
       break;
