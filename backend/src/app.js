@@ -7,7 +7,7 @@ import connectDB from './db/database.js';
 import { PORT, SECRET_KEY } from './config/env.js';
 import { authRouter } from './routes/auth.routes.js';
 import { jobsRoutes } from './routes/jobs.routes.js';
-import authMiddleware from './middlewares/validar-jwt.js';
+
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.use(session({
 }));
 
 app.use('/auth', authRouter);
-app.use('/todos', authMiddleware, jobsRoutes);
+app.use('/todos',jobsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);

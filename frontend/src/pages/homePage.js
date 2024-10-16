@@ -16,7 +16,6 @@ export async function homePage() {
       }
     } catch (error) {
       console.error('Error al validar la sesión:', error);
-      // Continuamos sin sesión válida
     }
 
     const response = await fetch('http://localhost:4000/todos/jobs', {
@@ -26,16 +25,13 @@ export async function homePage() {
 
     if (!response.ok) {
       if (response.status === 401) {
-        // Si el error es de autenticación, simplemente mostramos los trabajos sin opciones de edición
         console.log('Usuario no autenticado, mostrando trabajos sin opciones de edición');
       } else {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     }
-    
+
     const Curriculum = await response.json();
-    console.log('Curriculum.userId:', Curriculum.userId);
-    console.log('currentUserId:', currentUserId);
 
     if (Curriculum.length === 0) {
       $principal.innerHTML = '<p class="text-center text-gray-500">No hay trabajos disponibles en este momento.</p>';
@@ -56,8 +52,8 @@ export async function homePage() {
           <h3 class="text-xl text-gray-800 mb-2">${Curriculum.name || 'Usuario'}</h3>
           <p class="text-gray-600 mb-4">${Curriculum.profession || 'Profesión no especificada'}</p>
           <p class="text-sm text-gray-500 mb-4">${Curriculum.experience?.CurriculumDescription || 'Sin descripción'}</p>
-          <button class="bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2">Contactar</button>
-        ${Curriculum.userId === currentUserId ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}">Eliminar</button>` : ''}
+          <button class="contactarBtn bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2" data-curriculum-id="${Curriculum._id}">Contactar</button>
+          ${Curriculum.userId === currentUserId ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}">Eliminar</button>` : ''}
         </div>
       `;
     }).join('');
@@ -65,6 +61,22 @@ export async function homePage() {
     $principal.innerHTML = `
       <section class="flex flex-wrap justify-around my-10">${CurriculumHTML}</section>
     `;
+
+    // Agregar el event listener para los botones de "Contactar"
+    $principal.querySelectorAll('.contactarBtn').forEach(button => {
+      button.addEventListener('click', function() {
+        const curriculumId = this.getAttribute('data-curriculum-id');
+        
+        if (!curriculumId) {
+          alert("Error: No se encontró el ID del currículum.");
+          return;
+        }
+    
+        localStorage.setItem("curriculumId", curriculumId);
+        window.location.pathname = "/employee"; // Redirigir a la página de vista de detalles
+      });
+    });
+    
 
     // Agregar el event listener para eliminar trabajos solo si el usuario está logueado
     $principal.querySelectorAll('.delete-job-btn').forEach(button => {
@@ -93,7 +105,7 @@ export async function homePage() {
         });
       });
     });
-    
+
   } catch (error) {
     console.error('Error al obtener los trabajos:', error);
     $principal.innerHTML = `<p class="text-center text-red-500">Error al cargar los trabajos: ${error.message}</p>`;

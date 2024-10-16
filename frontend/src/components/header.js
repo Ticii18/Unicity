@@ -8,7 +8,7 @@ export async function Header() {
   const isLoggedIn = sessionStatus.valid;
 
   $header.innerHTML = `
-    <div class="text-2xl font-bold animate-pulse" style="animation: glow 1.5s ease-in-out infinite alternate">Unicity</div>
+    <img src="/unicityLogo.png" alt="Logo" class="h-14 mb-2" />
     <input type="text" placeholder="Buscar..." class="w-1/2 p-2 rounded-full border-none text-lg shadow-md" />
     <select class="p-2 rounded-full border-none text-black shadow-md bg-white">
       <option value="" disabled selected>Filtrar</option>

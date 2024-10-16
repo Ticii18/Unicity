@@ -43,6 +43,7 @@ export const createCurriculum = async (req, res) => {
 };
 
 
+
 // Obtener un curriculum por ID
 export const getCurriculumById = async (req, res) => {
   try {

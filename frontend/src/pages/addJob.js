@@ -236,6 +236,7 @@ export const curriculumPage = () => {
 
     if (response.ok) {
       alert("Currículum guardado con éxito.");
+      window.location.pathname = "/"; // Redirigir a la página de vista de detalles
       // Aquí puedes redirigir o actualizar la vista
     } else {
       const errorData = await response.json();
