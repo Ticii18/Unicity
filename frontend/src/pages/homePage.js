@@ -37,6 +37,14 @@ export async function homePage() {
       $principal.innerHTML = '<p class="text-center text-gray-500">No hay trabajos disponibles en este momento.</p>';
       return $principal;
     }
+    
+    const getAllProfessions = async()=> {await fetch(`http://localhost:4000/professions/trabajos/${id}`,{method:"GET"})}
+    const respuesta = await getAllProfessions.json();
+
+    console.log("profesiones",respue.profession);
+    // const mapProfessions = getAllProfessions.map(getJobs={
+    //   getJobs.profession
+    // })
 
     const CurriculumHTML = Curriculum.map(Curriculum => {
       const imageUrl = Curriculum.profilePhoto && Curriculum.profilePhoto.data

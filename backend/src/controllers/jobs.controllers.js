@@ -6,16 +6,16 @@ export const createCurriculum = async (req, res) => {
     console.log("userId:", req.params.userId); // Verificar que userId es correcto
     console.log("body:", req.body); // Verificar que los datos del formulario son correctos
 
+    
     // Verificar que se haya enviado la foto de perfil
     if (!req.file) {
       return res.status(400).json({ message: "La foto de perfil es obligatoria." });
     }
-
     // Crear una nueva instancia del modelo con los datos del request
     const curriculumData = {
       userId: req.params.userId, // Almacenar el ID del creador
       name: req.body.nombre,
-      profession: req.body.profesion,
+      professionId: req.body.profesion,
       email: req.body.correo,
       phone: req.body.telefono,
       linkedin: req.body.linkedin,
@@ -90,6 +90,7 @@ export const getAllCurriculums = async (req, res) => {
 export const updateCurriculum = async (req, res) => {
   try {
     const curriculumId = req.params.id;
+    console.log( req.body.profesion);
 
     const curriculumData = {
       name: req.body.nombre,
@@ -105,7 +106,6 @@ export const updateCurriculum = async (req, res) => {
       },
       skills: [req.body.habilidad1, req.body.habilidad2],
     };
-
     // Si se subió una nueva imagen, añadirla al curriculumData
     if (req.file) {
       curriculumData.profilePhoto = {

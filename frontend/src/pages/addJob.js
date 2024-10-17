@@ -72,36 +72,53 @@ export const curriculumPage = () => {
     "text-gray-600"
   );
 
-  const profesion = document.createElement("p");
-  profesion.classList.add("text-xl", "mt-2");
-  profesion.textContent = "Profesión";
+  const profesionLabel = document.createElement("label");
+  profesionLabel.textContent = "Selecciona tu profesión:";
+  profesionLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
 
-  const profesionInput = document.createElement("input");
-  profesionInput.type = "text";
-  profesionInput.placeholder = "Escribe tu profesión";
-  profesionInput.name = "profesion"; // Añadir atributo "name" para enviar en el fetch
-  profesionInput.classList.add(
+  const profesionSelect = document.createElement("select");
+  profesionSelect.name = "profesion"; // Aseguramos que el name sea "profesion"
+  profesionSelect.classList.add(
     "block",
     "mx-auto",
-    "mt-2",
     "p-2",
-    "w-1/2",
     "border-2",
     "border-gray-300",
     "rounded-lg",
-    "text-gray-600"
-  );
+    "bg-white",
+    "text-gray-600",
+    "m-6"
+  );  
+  const cargarProfesiones = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/professions/trabajos",{method:"GET"});
+      const profesiones = await response.json();
+      
+      profesiones.forEach((profesion) => {
+        const option = document.createElement("option");
+        option.value = profesion._id;  // Guardar el ID en el value
+        option.textContent = profesion.profession;
+        profesionSelect.appendChild(option);
+      });
+      
 
+    } catch (error) {
+      console.error("Error al cargar las profesiones:", error);
+    }
+  };
+  cargarProfesiones()
   // Agregar los elementos al div del header
   headerDiv.appendChild(fotoLabel);
   headerDiv.appendChild(fotoInput);
   headerDiv.appendChild(nombre);
   headerDiv.appendChild(nombreInput);
-  headerDiv.appendChild(profesion);
-  headerDiv.appendChild(profesionInput);
+  headerDiv.appendChild(profesionLabel)
+  headerDiv.appendChild(profesionSelect)
   header.appendChild(headerDiv);
 
-  form.appendChild(header);
+
+  
+form.appendChild(header);
 
   // Información Personal
   const personalInfoSection = document.createElement("section");
@@ -227,7 +244,7 @@ export const curriculumPage = () => {
     event.preventDefault();
     const formData = new FormData(form); // Crear un FormData para enviar archivos
     const userId = localStorage.getItem("userId"); // Asegúrate de que esto sea correcto
-
+    
     const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
       method: "POST",
       body: formData,

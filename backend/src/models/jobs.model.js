@@ -7,11 +7,12 @@ const CurriculumSchema = new mongoose.Schema({
     required: [true, "El nombre es obligatorio."],
     trim: true,
   },
-  profession: {
-    type: String,
-    required: [true, "La profesión es obligatoria."],
-    trim: true,
-  },
+  professionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Profession', 
+    required: [true, "El Oficio es obligatorio"]
+  }, // Referencia a oficio
+
   email: {
     type: String,
     required: [true, "El correo electrónico es obligatorio."],
