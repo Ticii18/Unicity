@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { getAllProfessions, getProffession } from "../controllers/ofices.controller.js";
+import { getAllProfessions, getProffessionById } from "../controllers/ofices.controller.js";
 
 const routerProfession = Router();
 
 routerProfession.get("/trabajos",getAllProfessions)
-routerProfession.get("/trabajos/:id",getProffession)
+routerProfession.get("/trabajos/:id",getProffessionById)
 
 export {routerProfession}

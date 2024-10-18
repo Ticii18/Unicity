@@ -11,12 +11,12 @@ export const getAllProfessions = async (req, res) => {
     }
 };
 
-export const getProffession = async(req,res) =>{
+export const getProffessionById = async(req,res) =>{
     const id = req.params.id
     try {
         const profession = await Profession.findById(id)
-        console.log(profession);
-        if(!id){
+        console.log("aaaaa",profession);
+        if(!id || !profession){
             return res.status(404).json({ message: 'oficio no encontrado' });
         }
         res.status(200).json(profession)

@@ -2,8 +2,8 @@ import { validateSession } from "../helpers/validateSession.js";
 
 export async function Header() {
   //aca estoy tuneando
-  const profesiones = await fetch("http://localhost:4000/todos/jobs").then((response)=>response.json()).then((json)=>json.map((s)=>s.profession))
-  console.log(profesiones);
+  const profesiones =  async()=> {await fetch(`http://localhost:4000/professions/trabajos/${id}`.then((response)=>response.json()).then((json)=>json.map((s)=>s.profession)))}
+  console.log(profesiones.profession);
   //aca termina
   const $header = document.createElement('header');
   $header.classList.add("flex", "justify-between", "items-center", "p-5", "bg-gradient-to-r", "from-blue-400", "to-blue-500", "text-white");

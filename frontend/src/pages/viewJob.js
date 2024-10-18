@@ -29,6 +29,24 @@ export const viewPage = async () => {
     return container;
   }
 
+
+  // NUEVOOOOOO
+  const getProfessionName = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:4000/professions/trabajos/${id}`);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const profession = await response.json(); // Asegúrate de que recibes el objeto correcto
+      return profession.profession || 'Profesión no especificada'; // Devuelve el nombre de la profesión
+    } catch (error) {
+      console.error("Error al obtener la profesión:", error);
+      return 'Profesión no especificada'; // Valor por defecto en caso de error
+    }
+  };
+  // NUEVOOOOO
+
+  
   // Obtener los datos del currículum de la base de datos
   let curriculumData = null;
   try {
@@ -98,9 +116,11 @@ export const viewPage = async () => {
   nombre.classList.add("text-4xl", "font-bold", "mt-6");
   nombre.textContent = curriculumData.name || "Nombre no especificado";
 
+  const professionName = await getProfessionName(curriculumData.professionId);
+
   const profesion = document.createElement("p");
   profesion.classList.add("text-xl", "mt-2");
-  profesion.textContent = curriculumData.profession || "Profesión no especificada";
+  profesion.textContent = `${professionName || "Profesión no especificada"}`;
 
   // Agregar los elementos al div del header
   headerDiv.appendChild(fotoLabel);

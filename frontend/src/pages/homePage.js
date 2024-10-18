@@ -38,15 +38,25 @@ export async function homePage() {
       return $principal;
     }
     
-    const getAllProfessions = async()=> {await fetch(`http://localhost:4000/professions/trabajos/${id}`,{method:"GET"})}
-    const respuesta = await getAllProfessions.json();
+    // Ruta para obtener las profesiones de la colección mediante el ID
+    const getProfessionName = async (id) => {
+      try {
+        const response = await fetch(`http://localhost:4000/professions/trabajos/${id}`);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+        const profession = await response.json(); // Asegúrate de que recibes el objeto correcto
+        return profession.profession || 'Profesión no especificada'; // Devuelve el nombre de la profesión
+      } catch (error) {
+        console.error("Error al obtener la profesión:", error);
+        return 'Profesión no especificada'; // Valor por defecto en caso de error
+      }
+    };
+    
+    
 
-    console.log("profesiones",respue.profession);
-    // const mapProfessions = getAllProfessions.map(getJobs={
-    //   getJobs.profession
-    // })
-
-    const CurriculumHTML = Curriculum.map(Curriculum => {
+    const CurriculumHTML = await Promise.all(Curriculum.map(async(Curriculum) => {
+      const professionName = await getProfessionName(Curriculum.professionId);
       const imageUrl = Curriculum.profilePhoto && Curriculum.profilePhoto.data
         ? `data:${Curriculum.profilePhoto.contentType};base64,${Curriculum.profilePhoto.data}`
         : 'placeholder.jpg';
@@ -58,16 +68,16 @@ export async function homePage() {
                class="w-full h-60 object-cover rounded-3xl mb-2" 
                onerror="this.onerror=null; this.src='placeholder.jpg';" />
           <h3 class="text-xl text-gray-800 mb-2">${Curriculum.name || 'Usuario'}</h3>
-          <p class="text-gray-600 mb-4">${Curriculum.profession || 'Profesión no especificada'}</p>
+          <p class="text-gray-600 mb-4">${professionName || 'Profesión no especificada'}</p>
           <p class="text-sm text-gray-500 mb-4">${Curriculum.experience?.CurriculumDescription || 'Sin descripción'}</p>
           <button class="contactarBtn bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2" data-curriculum-id="${Curriculum._id}">Contactar</button>
           ${Curriculum.userId === currentUserId ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}">Eliminar</button>` : ''}
         </div>
       `;
-    }).join('');
+    }))
 
     $principal.innerHTML = `
-      <section class="flex flex-wrap justify-around my-10">${CurriculumHTML}</section>
+      <section class="flex flex-wrap justify-around my-10">${CurriculumHTML.join('')}</section>
     `;
 
     // Agregar el event listener para los botones de "Contactar"
