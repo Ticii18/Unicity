@@ -63,6 +63,9 @@ export async function homePage() {
 
       return `
         <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${Curriculum._id}">
+                  ${Curriculum.userId === currentUserId ?
+          `<img src="circulo-de-basura.svg" alt="Eliminar" class="delete-job-btn h-10 mb-2 cursor-pointer" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}" />`
+          : ''}
           <img src="${imageUrl}" 
                alt="${Curriculum.name || 'Usuario'}" 
                class="w-full h-60 object-cover rounded-3xl mb-2" 
@@ -71,7 +74,7 @@ export async function homePage() {
           <p class="text-gray-600 mb-4">${professionName || 'Profesión no especificada'}</p>
           <p class="text-sm text-gray-500 mb-4">${Curriculum.experience?.CurriculumDescription || 'Sin descripción'}</p>
           <button class="contactarBtn bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2" data-curriculum-id="${Curriculum._id}">Contactar</button>
-          ${Curriculum.userId === currentUserId ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}">Eliminar</button>` : ''}
+
         </div>
       `;
     }))
@@ -82,27 +85,28 @@ export async function homePage() {
 
     // Agregar el event listener para los botones de "Contactar"
     $principal.querySelectorAll('.contactarBtn').forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         const curriculumId = this.getAttribute('data-curriculum-id');
-        
+
         if (!curriculumId) {
           alert("Error: No se encontró el ID del currículum.");
           return;
         }
-    
+
         localStorage.setItem("curriculumId", curriculumId);
         window.location.pathname = "/employee"; // Redirigir a la página de vista de detalles
       });
     });
-    
+
+
 
     // Agregar el event listener para eliminar trabajos solo si el usuario está logueado
     $principal.querySelectorAll('.delete-job-btn').forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         const userId = this.getAttribute('data-user-id');
         const jobId = this.getAttribute('data-job-id');
         const jobElement = this.closest('.job-element'); // Obtener el elemento contenedor del trabajo
-    
+
         fetch(`http://localhost:4000/todos/delete/${jobId}`, {
           method: 'DELETE',
           credentials: 'include',
@@ -123,7 +127,6 @@ export async function homePage() {
         });
       });
     });
-
   } catch (error) {
     console.error('Error al obtener los trabajos:', error);
     $principal.innerHTML = `<p class="text-center text-red-500">Error al cargar los trabajos: ${error.message}</p>`;
