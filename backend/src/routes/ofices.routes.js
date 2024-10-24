@@ -6,4 +6,5 @@ const routerProfession = Router();
 routerProfession.get("/trabajos",getAllProfessions)
 routerProfession.get("/trabajos/:id",getProffessionById)
 
+
 export {routerProfession}
