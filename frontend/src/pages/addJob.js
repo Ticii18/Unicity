@@ -72,51 +72,70 @@ export const curriculumPage = () => {
     "text-gray-600"
   );
 
+
+ 
+
   const profesionLabel = document.createElement("label");
   profesionLabel.textContent = "Selecciona tu profesión:";
   profesionLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
-
   const profesionSelect = document.createElement("select");
-  profesionSelect.name = "profesion"; // Aseguramos que el name sea "profesion"
+  profesionSelect.name = "profesion";
   profesionSelect.classList.add(
-    "block",
-    "mx-auto",
-    "p-2",
-    "border-2",
-    "border-gray-300",
-    "rounded-lg",
-    "bg-white",
-    "text-gray-600",
-    "m-6"
-  );  
+    "block", "mx-auto", "p-2", "border-2", "border-gray-300", 
+    "rounded-lg", "bg-white", "text-gray-600", "m-6"
+  );
+  
   const cargarProfesiones = async () => {
     try {
-      const response = await fetch("http://localhost:4000/professions/trabajos",{method:"GET"});
+      const response = await fetch("http://localhost:4000/professions/trabajos", { method: "GET" });
       const profesiones = await response.json();
-      
+  
       profesiones.forEach((profesion) => {
         const option = document.createElement("option");
-        option.value = profesion._id;  // Guardar el ID en el value
+        option.value = profesion._id;
         option.textContent = profesion.profession;
         profesionSelect.appendChild(option);
       });
-      
-
+  
+      // Opción adicional "Otros"
+      const otherOption = document.createElement("option");
+      otherOption.value = "otros";
+      otherOption.textContent = "Otros";
+      profesionSelect.appendChild(otherOption);
     } catch (error) {
       console.error("Error al cargar las profesiones:", error);
     }
   };
-  cargarProfesiones()
+  cargarProfesiones();
+
+  const otherProfessionInput = document.createElement("input");
+otherProfessionInput.type = "text";
+otherProfessionInput.name = "otherProfession";
+otherProfessionInput.placeholder = "Escribe tu profesión";
+otherProfessionInput.classList.add("block", "mt-2", "p-2", "border-2", "border-gray-300", "rounded-lg", "text-black");
+otherProfessionInput.style.display = "none";  // Ocultamos el input al inicio
+
+// Mostrar/ocultar input según la selección del usuario
+profesionSelect.addEventListener("change", (event) => {
+  if (event.target.value === "otros") {
+    otherProfessionInput.style.display = "block";
+  } else {
+    otherProfessionInput.style.display = "none";
+  }
+});
+form.appendChild(profesionSelect);
+
   // Agregar los elementos al div del header
   headerDiv.appendChild(fotoLabel);
   headerDiv.appendChild(fotoInput);
   headerDiv.appendChild(nombre);
   headerDiv.appendChild(nombreInput);
   headerDiv.appendChild(profesionLabel)
+  headerDiv.appendChild(otherProfessionInput);
   headerDiv.appendChild(profesionSelect)
   header.appendChild(headerDiv);
-
-
+  
+  
   
 form.appendChild(header);
 

@@ -1,20 +1,32 @@
 import Curriculum from '../models/jobs.model.js'; 
 
 // Crear un nuevo curriculum
+import Profession from '../models/ofices.model.js';
+
 export const createCurriculum = async (req, res) => {
   try {
-    console.log("userId:", req.params.userId); // Verificar que userId es correcto
-    console.log("body:", req.body); // Verificar que los datos del formulario son correctos
+    console.log("userId:", req.params.userId);
+    console.log("body:", req.body);
 
     // Verificar que se haya enviado la foto de perfil
     if (!req.file) {
       return res.status(400).json({ message: "La foto de perfil es obligatoria." });
     }
-    // Crear una nueva instancia del modelo con los datos del request
+
+    let professionId = req.body.profesion; // Mantener el ID recibido desde el formulario
+
+    // Si el usuario elige "otros" e ingresa una nueva profesión
+    if (req.body.profesion === "otros" && req.body.otherProfession) {
+      const newProfession = new Profession({ profession: req.body.otherProfession });
+      const savedProfession = await newProfession.save();
+      professionId = savedProfession._id; // Usar el ID de la nueva profesión
+    }
+
+    // Crear el objeto con los datos del currículum
     const curriculumData = {
-      userId: req.params.userId, // Almacenar el ID del creador
+      userId: req.params.userId, 
       name: req.body.nombre,
-      professionId: req.body.profesion,
+      professionId, 
       email: req.body.correo,
       phone: req.body.telefono,
       linkedin: req.body.linkedin,
@@ -27,13 +39,13 @@ export const createCurriculum = async (req, res) => {
       skills: [req.body.habilidad1, req.body.habilidad2],
       profilePhoto: {
         data: req.file.buffer,
-        contentType: req.file.mimetype, 
+        contentType: req.file.mimetype,
       },
     };
 
-    // Guardar curriculumData en la base de datos
+    // Guardar el currículum en la base de datos
     const newCurriculum = await Curriculum.create(curriculumData);
-    res.status(201).json(newCurriculum); // Responder con el currículum creado
+    res.status(201).json(newCurriculum); 
 
   } catch (error) {
     console.error("Error al crear el currículum:", error);

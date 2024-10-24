@@ -86,7 +86,7 @@ export const viewPage = async () => {
 
   // Obtener los datos de la foto de perfil
   const { profilePhoto } = curriculumData;
-
+// console.log(curriculumData.profilePhoto);
   // Intentar construir la fuente de la imagen
   try {
     const imageData = profilePhoto?.data?.data || []; // Usar un array vacío como fallback
