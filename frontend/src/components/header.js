@@ -13,7 +13,7 @@ export async function Header() {
 
   $header.innerHTML = `
     <img src="/unicityLogo.png" alt="Logo" class="h-14 mb-2" />
-    <input type="text" placeholder="Buscar..." class="w-1/2 p-2 rounded-full border-none text-lg shadow-md" />
+    <input type="text" placeholder="Buscar..." class="w-1/2 p-2  text-black rounded-full border-none text-lg shadow-md" />
     <select class="p-2 rounded-full border-none text-black shadow-md bg-white">
       <option value="" disabled selected>Filtrar</option>
       <option value="option1">Electricidad</option>

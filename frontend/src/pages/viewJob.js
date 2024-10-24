@@ -46,7 +46,7 @@ export const viewPage = async () => {
   };
   // NUEVOOOOO
 
-  
+
   // Obtener los datos del currículum de la base de datos
   let curriculumData = null;
   try {
@@ -188,7 +188,6 @@ export const viewPage = async () => {
   personalInfoSection.appendChild(addInputField("Teléfono:", curriculumData.phone || "", "telefono", "tel", loggedInUserId === curriculumData.userId));
   personalInfoSection.appendChild(addInputField("LinkedIn:", curriculumData.linkedin || "", "linkedin", "text", loggedInUserId === curriculumData.userId));
   personalInfoSection.appendChild(addInputField("Sitio web:", curriculumData.website || "", "sitioWeb", "url", loggedInUserId === curriculumData.userId));
-
   form.appendChild(personalInfoSection);
 
   // Crear la sección de Experiencia Profesional
@@ -281,6 +280,127 @@ export const viewPage = async () => {
   skillsSection.appendChild(addInputField("Habilidad 2:", curriculumData.skills?.[1] || "", "habilidad2", "text", loggedInUserId === curriculumData.userId));
 
   form.appendChild(skillsSection);
+// Crear etiqueta para subir fotos de trabajos realizados
+const imageContainer = document.createElement("div");
+imageContainer.id = "imageContainer";
+imageContainer.classList.add("grid", "grid-cols-2", "gap-4", "mt-4");
+
+const imgLabel = document.createElement("label");
+imgLabel.setAttribute("for", "trabajos");
+imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
+imgLabel.textContent = "Subir foto:";
+
+// Crear input para seleccionar la imagen
+const fotoInput = document.createElement("input");
+fotoInput.type = "file";
+fotoInput.id = "trabajos";
+fotoInput.name = "image"; // Name debe coincidir con lo que espera multer en el backend
+fotoInput.accept = "image/*"; // Aceptar solo imágenes
+fotoInput.classList.add(
+  "block",
+  "mx-auto",
+  "p-2",
+  "border-2",
+  "border-gray-300",
+  "rounded-lg",
+  "bg-white",
+  "text-gray-600"
+);
+imageContainer.appendChild(imgLabel);
+imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor
+
+// Crear contenedor para las fotos de trabajos realizados
+const imgJobs = document.createElement("section");
+imgJobs.classList.add(
+  "bg-white",
+  "shadow-lg",
+  "rounded-lg",
+  "p-6",
+  "mt-6",
+  "mx-4",
+  "md:mx-auto",
+  "max-w-4xl"
+);
+
+// Mostrar las imágenes existentes
+// Asegurarse de que 'images' sea un array válido
+const { images } = curriculumData || { images: [] };
+
+// Mostrar las imágenes existentes
+images.forEach((image) => {
+  const imgElement = document.createElement("img");
+  const imageData = image.data?.data || [];
+  const contentType = image.contentType || 'image/jpeg';
+
+  // Crear un Blob para la imagen y obtener su URL
+  const blob = new Blob([new Uint8Array(imageData)], { type: contentType });
+  const imageUrl = URL.createObjectURL(blob);
+
+  imgElement.src = imageUrl;
+  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-auto", "mb-4", "rounded");
+
+  // Agregar la imagen al contenedor
+  imgJobs.appendChild(imgElement);
+});
+
+
+// Crear botón para subir imágenes
+const sendImg = document.createElement("button");
+sendImg.type = "submit";
+sendImg.textContent = "Subir foto";
+sendImg.classList.add(
+  "bg-blue-500",
+  "text-white",
+  "py-2",
+  "px-4",
+  "mt-4",
+  "rounded",
+  "hover:bg-blue-700",
+  "transition"
+);
+
+// Agregar el input y las imágenes al formulario o sección
+imageContainer.appendChild(imgJobs);
+imageContainer.appendChild(sendImg);
+form.appendChild (imageContainer);
+// Mostrar el botón solo si el usuario es el propietario del currículum
+// Reemplazamos el addEventListener del botón de subir imágenes
+sendImg.addEventListener("click", async (event) => {
+  event.preventDefault(); // Evitar que se recargue la página
+
+  // Verificar que el usuario sea el propietario
+  if (loggedInUserId !== curriculumData.userId) {
+    alert("No tienes permisos para subir imágenes.");
+    return;
+  }
+
+  const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
+  const files = fotoInput.files; // Obtener las imágenes seleccionadas
+
+  // Agregar cada imagen al FormData
+  for (let i = 0; i < files.length; i++) {
+    imgData.append("image", files[i]);
+  }
+
+  try {
+    const response = await fetch(`http://localhost:4000/todos/upload/${curriculumId}`, {
+      method: "POST",
+      body: imgData,
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      alert("Imagen(es) cargada(s) con éxito.");
+      location.reload(); // Recargar para mostrar las imágenes nuevas
+    } else {
+      const errorData = await response.json();
+      alert(`Error: ${errorData.message}`);
+    }
+  } catch (error) {
+    alert("Error al cargar imagen(es).");
+    console.error("Error:", error);
+  }
+});
 
   // Botón de Enviar
   const submitButton = document.createElement("button");

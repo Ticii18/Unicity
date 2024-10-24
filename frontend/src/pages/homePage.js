@@ -32,7 +32,6 @@ export async function homePage() {
     }
 
     const Curriculum = await response.json();
-
     if (Curriculum.length === 0) {
       $principal.innerHTML = '<p class="text-center text-gray-500">No hay trabajos disponibles en este momento.</p>';
       return $principal;
@@ -60,7 +59,6 @@ export async function homePage() {
       const imageUrl = Curriculum.profilePhoto && Curriculum.profilePhoto.data
         ? `data:${Curriculum.profilePhoto.contentType};base64,${Curriculum.profilePhoto.data}`
         : 'placeholder.jpg';
-
       return `
         <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${Curriculum._id}">
                   ${Curriculum.userId === currentUserId ?
@@ -78,6 +76,8 @@ export async function homePage() {
         </div>
       `;
     }))
+    console.log("concha",Curriculum.name);
+
 
     $principal.innerHTML = `
       <section class="flex flex-wrap justify-around my-10">${CurriculumHTML.join('')}</section>

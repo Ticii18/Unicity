@@ -6,7 +6,6 @@ export const createCurriculum = async (req, res) => {
     console.log("userId:", req.params.userId); // Verificar que userId es correcto
     console.log("body:", req.body); // Verificar que los datos del formulario son correctos
 
-    
     // Verificar que se haya enviado la foto de perfil
     if (!req.file) {
       return res.status(400).json({ message: "La foto de perfil es obligatoria." });
@@ -84,13 +83,50 @@ export const getAllCurriculums = async (req, res) => {
   }
 };
 
+// Subir una foto de oficio
+
+export const uploadJob = async (req, res) => {
+  try {
+    const curriculumId = req.params.id;
+
+    // Verificar si se subieron archivos
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No se subieron imágenes." });
+    }
+
+    // Crear un array de imágenes para almacenar en la base de datos
+    const images = req.files.map((file) => ({
+      data: file.buffer,
+      contentType: file.mimetype,
+    }));
+
+    // Actualizar el currículum agregando las imágenes
+    const updatedCurriculum = await Curriculum.findByIdAndUpdate(
+      curriculumId,
+      { $push: { images: { $each: images } } }, // Agregar imágenes al array existente
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedCurriculum) {
+      return res.status(404).json({ message: "Currículum no encontrado" });
+    }
+
+    res.status(200).json({
+      message: "Imágenes subidas con éxito",
+      curriculum: updatedCurriculum,
+    });
+  } catch (error) {
+    console.error("Error al subir imágenes:", error);
+    res.status(500).json({ message: "Error al subir las imágenes", error });
+  }
+};
+
 
 // Actualizar un curriculum
 
 export const updateCurriculum = async (req, res) => {
   try {
     const curriculumId = req.params.id;
-    console.log( req.body.profesion);
 
     const curriculumData = {
       name: req.body.nombre,
@@ -106,22 +142,29 @@ export const updateCurriculum = async (req, res) => {
       },
       skills: [req.body.habilidad1, req.body.habilidad2],
     };
-    // Si se subió una nueva imagen, añadirla al curriculumData
-    if (req.file) {
-      curriculumData.profilePhoto = {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      };
+
+    // Obtener el curriculum existente
+    const existingCurriculum = await Curriculum.findById(curriculumId);
+
+    if (!existingCurriculum) {
+      return res.status(404).json({ message: 'Curriculum no encontrado' });
+    }
+    console.log("aaaaaaa",req.file);
+
+    // Si se subieron nuevas imágenes, agrégalas a las existentes
+    if (req.file && req.file.length > 0) {
+      const newImages = req.file.map((file) => ({
+        data: file.buffer,
+        contentType: file.mimetype,
+      }));
+      // Agregar las nuevas imágenes a las imágenes existentes
+      curriculumData.images = [...existingCurriculum.images, ...newImages];
     }
 
     const updatedCurriculum = await Curriculum.findByIdAndUpdate(curriculumId, curriculumData, {
-      new: true, // Devuelve el documento actualizado
-      runValidators: true, // Aplica validaciones del esquema
+      new: true,
+      runValidators: true,
     });
-
-    if (!updatedCurriculum) {
-      return res.status(404).json({ message: 'Curriculum no encontrado' });
-    }
 
     return res.status(200).json({
       message: 'Curriculum actualizado con éxito',
