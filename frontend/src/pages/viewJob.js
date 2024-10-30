@@ -86,7 +86,7 @@ export const viewPage = async () => {
 
   // Obtener los datos de la foto de perfil
   const { profilePhoto } = curriculumData;
-
+// console.log(curriculumData.profilePhoto);
   // Intentar construir la fuente de la imagen
   try {
     const imageData = profilePhoto?.data?.data || []; // Usar un array vacío como fallback
@@ -288,7 +288,7 @@ imageContainer.classList.add("grid", "grid-cols-2", "gap-4", "mt-4");
 const imgLabel = document.createElement("label");
 imgLabel.setAttribute("for", "trabajos");
 imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
-imgLabel.textContent = "Subir foto:";
+imgLabel.textContent = "Trabajos realizados:";
 
 // Crear input para seleccionar la imagen
 const fotoInput = document.createElement("input");
