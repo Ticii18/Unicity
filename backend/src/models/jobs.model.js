@@ -30,32 +30,38 @@ const CurriculumSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  experience: [{
-    company: {
+  experience: [
+    {
+      company: {
+        type: String,
+        trim: true,
+      },
+      duration: {
+        type: String,
+        trim: true,
+      },
+      jobDescription: {
+        type: String,
+        trim: true,
+      },
+    },
+  ],
+  skills: [
+    {
       type: String,
       trim: true,
     },
-    duration: {
-      type: String,
-      trim: true,
-    },
-    jobDescription: {
-      type: String,
-      trim: true,
-    },
-  }],
-  skills: [{
-    type: String,
-    trim: true,
-  }],
+  ],
   profilePhoto: {
     data: Buffer,
     contentType: String,
   },
-  images: [{
-    data: Buffer,
-    contentType: String,
-  }],
+  images: [
+    {
+      data: Buffer,
+      contentType: String,
+    },
+  ],
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Relación con la colección de usuarios
@@ -72,4 +78,3 @@ const Curriculum = mongoose.model("Curriculum", CurriculumSchema);
 
 // Exportar el modelo para su uso en controladores y otros módulos
 export default Curriculum;
-

@@ -1,6 +1,12 @@
-import { validateSession } from "../helpers/validateSession";
+import { validateSession } from "../helpers/validateSession.js";
 
-export async function homePage() {
+export async function homePage(query = "", filter = "") {
+  const $search = document
+    .querySelector("#search-input")
+    .addEventListener("input", (e) => {
+      return e.target.value;
+    });
+
   const $principal = document.createElement("div");
   $principal.classList.add("flex-grow");
 
@@ -18,10 +24,15 @@ export async function homePage() {
       console.error("Error al validar la sesión:", error);
     }
 
-    const response = await fetch("http://localhost:4000/todos/jobs", {
-      method: "GET",
-      credentials: "include",
-    });
+    // Realiza la búsqueda utilizando la query y el filtro
+
+    const response = await fetch(
+      `http://localhost:4000/todos/jobs?query=${query}&filter=${filter}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -41,44 +52,45 @@ export async function homePage() {
       return $principal;
     }
 
-    const CurriculumHTML = Curriculum.map((Curriculum) => {
+    const CurriculumHTML = Curriculum.map((curriculum) => {
       const imageUrl =
-        Curriculum.profilePhoto && Curriculum.profilePhoto.data
-          ? `data:${Curriculum.profilePhoto.contentType};base64,${Curriculum.profilePhoto.data}`
+        curriculum.profilePhoto && curriculum.profilePhoto.data
+          ? `data:${curriculum.profilePhoto.contentType};base64,${curriculum.profilePhoto.data}`
           : "placeholder.jpg";
 
       return `
         <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${
-          Curriculum._id
+          curriculum._id
         }">
           <img src="${imageUrl}" 
-               alt="${Curriculum.name || "Usuario"}" 
-               class="w-full h-60 object-cover rounded-3xl mb-2" 
-               onerror="this.onerror=null; this.src='placeholder.jpg';" />
+          alt="${curriculum.name || "Usuario"}" 
+          class="w-full h-60 object-cover rounded-3xl mb-2" 
+          onerror="this.onerror=null; this.src='placeholder.jpg';" />
           <h3 class="text-xl text-gray-800 mb-2">${
-            Curriculum.name || "Usuario"
+            curriculum.name || "Usuario"
           }</h3>
-          <p class="text-gray-600 mb-4">${
-            Curriculum.profession || "Profesión no especificada"
-          }</p>
-          <p class="text-sm text-gray-500 mb-4">${
-            Curriculum.experience?.CurriculumDescription || "Sin descripción"
-          }</p>
-          <button class="contactarBtn bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2" data-curriculum-id="${
-            Curriculum._id
-          }">Contactar</button>
-          ${
-            Curriculum.userId === currentUserId
-              ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${Curriculum._id}">Eliminar</button>`
-              : ""
-          }
-        </div>
-      `;
+            <p class="text-gray-600 mb-4">${
+              curriculum.profession || "Profesión no especificada"
+            }</p>
+              <p class="text-sm text-gray-500 mb-4">${
+                curriculum.experience?.CurriculumDescription ||
+                "Sin descripción"
+              }</p>
+                <button class="contactarBtn bg-blue-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-blue-400 mb-2" data-curriculum-id="${
+                  curriculum._id
+                }">Contactar</button>
+                    ${
+                      curriculum.userId === currentUserId
+                        ? `<button class="delete-job-btn bg-red-500 text-white py-2 px-4 rounded-full transition-colors duration-300 hover:bg-red-400" data-user-id="${currentUserId}" data-job-id="${curriculum._id}">Eliminar</button>`
+                        : ""
+                    }
+                      </div>
+                      `;
     }).join("");
 
     $principal.innerHTML = `
-      <section class="flex flex-wrap justify-around my-10">${CurriculumHTML}</section>
-    `;
+                    <section class="flex flex-wrap justify-around my-10">${CurriculumHTML}</section>
+                    `;
 
     // Agregar el event listener para los botones de "Contactar"
     $principal.querySelectorAll(".contactarBtn").forEach((button) => {
