@@ -17,6 +17,7 @@ jobsRoutes.get("/jobs", getAllCurriculums);
 
 // Ruta para obtener un curriculum específico por ID (protegida)
 jobsRoutes.get("/:id", getCurriculumById);
+
 // Ruta para crear un nuevo curriculum (protegida)
 jobsRoutes.post("/add/:userId",authMiddleware, upload.single("image"), createCurriculum);
 
