@@ -283,7 +283,8 @@ export const viewPage = async () => {
 // Crear etiqueta para subir fotos de trabajos realizados
 const imageContainer = document.createElement("div");
 imageContainer.id = "imageContainer";
-imageContainer.classList.add("grid", "grid-cols-2", "gap-4", "mt-4");
+imageContainer.classList.add("flex", "flex-col", "gap-4", "mt-4");
+
 
 const imgLabel = document.createElement("label");
 imgLabel.setAttribute("for", "trabajos");
@@ -312,6 +313,8 @@ imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contene
 // Crear contenedor para las fotos de trabajos realizados
 const imgJobs = document.createElement("section");
 imgJobs.classList.add(
+"flex",        
+  "flex-wrap",  
   "bg-white",
   "shadow-lg",
   "rounded-lg",
@@ -337,7 +340,7 @@ images.forEach((image) => {
   const imageUrl = URL.createObjectURL(blob);
 
   imgElement.src = imageUrl;
-  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-auto", "mb-4", "rounded");
+  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-5", "mb-4", "rounded");
 
   // Agregar la imagen al contenedor
   imgJobs.appendChild(imgElement);
