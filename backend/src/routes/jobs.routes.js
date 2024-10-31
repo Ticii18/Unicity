@@ -5,6 +5,7 @@ import {
   getAllCurriculums,
   updateCurriculum,
   deleteCurriculum,
+  uploadJob,
 } from "../controllers/jobs.controllers.js";
 import authMiddleware from "../middlewares/validar-jwt.js";
 import upload from "../helpers/multer.js";
@@ -51,6 +52,13 @@ jobsRoutes.put(
   authMiddleware,
   upload.single("image"),
   updateCurriculum
+);
+
+jobsRoutes.post(
+  "/upload/:id",
+  authMiddleware,
+  upload.array("image", 10),
+  uploadJob
 );
 
 // Ruta para eliminar un curriculum (protegida)

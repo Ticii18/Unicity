@@ -31,6 +31,7 @@ export const curriculumPage = () => {
   const headerDiv = document.createElement("div");
   headerDiv.classList.add("container", "mx-auto", "text-center");
 
+// Manejar la subida de la foto de perfil
   const fotoLabel = document.createElement("label");
   fotoLabel.setAttribute("for", "fotoPerfil");
   fotoLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
@@ -52,6 +53,7 @@ export const curriculumPage = () => {
     "text-gray-600"
   );
 
+  // Nombre de Usuario
   const nombre = document.createElement("h1");
   nombre.classList.add("text-4xl", "font-bold", "mt-6");
   nombre.textContent = "Nombre Completo";
@@ -72,34 +74,81 @@ export const curriculumPage = () => {
     "text-gray-600"
   );
 
-  const profesion = document.createElement("p");
-  profesion.classList.add("text-xl", "mt-2");
-  profesion.textContent = "Profesión";
+// Lista desplegable para las profesiones traída desde la base de datos
+  const profesionLabel = document.createElement("label");
+  profesionLabel.textContent = "Selecciona tu profesión:";
+  profesionLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
 
-  const profesionInput = document.createElement("input");
-  profesionInput.type = "text";
-  profesionInput.placeholder = "Escribe tu profesión";
-  profesionInput.name = "profesion"; // Añadir atributo "name" para enviar en el fetch
-  profesionInput.classList.add(
-    "block",
-    "mx-auto",
-    "mt-2",
-    "p-2",
-    "w-1/2",
-    "border-2",
-    "border-gray-300",
-    "rounded-lg",
-    "text-gray-600"
+  // un placeholder sin valor para mostrar el mensaje de que seleccione su oficio
+  const optionHolder = document.createElement("option");
+  optionHolder.textContent = "seleccionar profesión"
+  optionHolder.value = ""
+  optionHolder.disabled = true
+  optionHolder.selected = true
+
+  
+  const profesionSelect = document.createElement("select");
+  profesionSelect.name = "profesion";
+  profesionSelect.classList.add(
+    "block", "mx-auto", "p-2", "border-2", "border-gray-300",
+    "rounded-lg", "bg-white", "text-gray-600", "m-6"
   );
 
+  // función que trae las profesiones desde la base de datos
+  const cargarProfesiones = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/professions/trabajos", { method: "GET" });
+      const profesiones = await response.json();
+
+      profesiones.forEach((profesion) => {
+        const option = document.createElement("option");
+        option.value = profesion._id;
+        option.textContent = profesion.profession;
+        profesionSelect.appendChild(option);
+      });
+
+      // opción para "Otros"
+      const otherOption = document.createElement("option");
+      otherOption.value = "otros";
+      otherOption.textContent = "Otros";
+      profesionSelect.appendChild(otherOption);
+    } catch (error) {
+      console.error("Error al cargar las profesiones:", error);
+    }
+  };
+  // renderizado de las profesiones en la lista desplegable
+  cargarProfesiones();
+
+  const otherProfessionInput = document.createElement("input");
+  otherProfessionInput.type = "text";
+  otherProfessionInput.name = "otherProfession";
+  otherProfessionInput.placeholder = "Escribe tu profesión";
+  otherProfessionInput.classList.add("block", "mt-2", "p-2", "border-2", "border-gray-300", "rounded-lg", "text-black");
+  otherProfessionInput.style.display = "none";  // input inicialmente oculto
+
+  // Mostrar/ocultar input según la selección del usuario
+  profesionSelect.addEventListener("change", (event) => {
+    if (event.target.value === "otros") {
+      otherProfessionInput.style.display = "block";
+    } else {
+      otherProfessionInput.style.display = "none";
+    }
+  });
+
+  
   // Agregar los elementos al div del header
+  form.appendChild(profesionSelect);
+  profesionSelect.appendChild(optionHolder)
   headerDiv.appendChild(fotoLabel);
   headerDiv.appendChild(fotoInput);
   headerDiv.appendChild(nombre);
   headerDiv.appendChild(nombreInput);
-  headerDiv.appendChild(profesion);
-  headerDiv.appendChild(profesionInput);
+  headerDiv.appendChild(profesionLabel)
+  headerDiv.appendChild(otherProfessionInput);
+  headerDiv.appendChild(profesionSelect)
   header.appendChild(headerDiv);
+
+
 
   form.appendChild(header);
 

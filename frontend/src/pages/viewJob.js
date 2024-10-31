@@ -29,6 +29,24 @@ export const viewPage = async () => {
     return container;
   }
 
+
+  // NUEVOOOOOO
+  const getProfessionName = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:4000/professions/trabajos/${id}`);
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      const profession = await response.json(); // Asegúrate de que recibes el objeto correcto
+      return profession.profession || 'Profesión no especificada'; // Devuelve el nombre de la profesión
+    } catch (error) {
+      console.error("Error al obtener la profesión:", error);
+      return 'Profesión no especificada'; // Valor por defecto en caso de error
+    }
+  };
+  // NUEVOOOOO
+
+
   // Obtener los datos del currículum de la base de datos
   let curriculumData = null;
   try {
@@ -68,7 +86,7 @@ export const viewPage = async () => {
 
   // Obtener los datos de la foto de perfil
   const { profilePhoto } = curriculumData;
-
+// console.log(curriculumData.profilePhoto);
   // Intentar construir la fuente de la imagen
   try {
     const imageData = profilePhoto?.data?.data || []; // Usar un array vacío como fallback
@@ -98,9 +116,11 @@ export const viewPage = async () => {
   nombre.classList.add("text-4xl", "font-bold", "mt-6");
   nombre.textContent = curriculumData.name || "Nombre no especificado";
 
+  const professionName = await getProfessionName(curriculumData.professionId);
+
   const profesion = document.createElement("p");
   profesion.classList.add("text-xl", "mt-2");
-  profesion.textContent = curriculumData.profession || "Profesión no especificada";
+  profesion.textContent = `${professionName || "Profesión no especificada"}`;
 
   // Agregar los elementos al div del header
   headerDiv.appendChild(fotoLabel);
@@ -168,7 +188,6 @@ export const viewPage = async () => {
   personalInfoSection.appendChild(addInputField("Teléfono:", curriculumData.phone || "", "telefono", "tel", loggedInUserId === curriculumData.userId));
   personalInfoSection.appendChild(addInputField("LinkedIn:", curriculumData.linkedin || "", "linkedin", "text", loggedInUserId === curriculumData.userId));
   personalInfoSection.appendChild(addInputField("Sitio web:", curriculumData.website || "", "sitioWeb", "url", loggedInUserId === curriculumData.userId));
-
   form.appendChild(personalInfoSection);
 
   // Crear la sección de Experiencia Profesional
@@ -261,6 +280,127 @@ export const viewPage = async () => {
   skillsSection.appendChild(addInputField("Habilidad 2:", curriculumData.skills?.[1] || "", "habilidad2", "text", loggedInUserId === curriculumData.userId));
 
   form.appendChild(skillsSection);
+// Crear etiqueta para subir fotos de trabajos realizados
+const imageContainer = document.createElement("div");
+imageContainer.id = "imageContainer";
+imageContainer.classList.add("grid", "grid-cols-2", "gap-4", "mt-4");
+
+const imgLabel = document.createElement("label");
+imgLabel.setAttribute("for", "trabajos");
+imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
+imgLabel.textContent = "Subir foto:";
+
+// Crear input para seleccionar la imagen
+const fotoInput = document.createElement("input");
+fotoInput.type = "file";
+fotoInput.id = "trabajos";
+fotoInput.name = "image"; // Name debe coincidir con lo que espera multer en el backend
+fotoInput.accept = "image/*"; // Aceptar solo imágenes
+fotoInput.classList.add(
+  "block",
+  "mx-auto",
+  "p-2",
+  "border-2",
+  "border-gray-300",
+  "rounded-lg",
+  "bg-white",
+  "text-gray-600"
+);
+imageContainer.appendChild(imgLabel);
+imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor
+
+// Crear contenedor para las fotos de trabajos realizados
+const imgJobs = document.createElement("section");
+imgJobs.classList.add(
+  "bg-white",
+  "shadow-lg",
+  "rounded-lg",
+  "p-6",
+  "mt-6",
+  "mx-4",
+  "md:mx-auto",
+  "max-w-4xl"
+);
+
+// Mostrar las imágenes existentes
+// Asegurarse de que 'images' sea un array válido
+const { images } = curriculumData || { images: [] };
+
+// Mostrar las imágenes existentes
+images.forEach((image) => {
+  const imgElement = document.createElement("img");
+  const imageData = image.data?.data || [];
+  const contentType = image.contentType || 'image/jpeg';
+
+  // Crear un Blob para la imagen y obtener su URL
+  const blob = new Blob([new Uint8Array(imageData)], { type: contentType });
+  const imageUrl = URL.createObjectURL(blob);
+
+  imgElement.src = imageUrl;
+  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-auto", "mb-4", "rounded");
+
+  // Agregar la imagen al contenedor
+  imgJobs.appendChild(imgElement);
+});
+
+
+// Crear botón para subir imágenes
+const sendImg = document.createElement("button");
+sendImg.type = "submit";
+sendImg.textContent = "Subir foto";
+sendImg.classList.add(
+  "bg-blue-500",
+  "text-white",
+  "py-2",
+  "px-4",
+  "mt-4",
+  "rounded",
+  "hover:bg-blue-700",
+  "transition"
+);
+
+// Agregar el input y las imágenes al formulario o sección
+imageContainer.appendChild(imgJobs);
+imageContainer.appendChild(sendImg);
+form.appendChild (imageContainer);
+// Mostrar el botón solo si el usuario es el propietario del currículum
+// Reemplazamos el addEventListener del botón de subir imágenes
+sendImg.addEventListener("click", async (event) => {
+  event.preventDefault(); // Evitar que se recargue la página
+
+  // Verificar que el usuario sea el propietario
+  if (loggedInUserId !== curriculumData.userId) {
+    alert("No tienes permisos para subir imágenes.");
+    return;
+  }
+
+  const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
+  const files = fotoInput.files; // Obtener las imágenes seleccionadas
+
+  // Agregar cada imagen al FormData
+  for (let i = 0; i < files.length; i++) {
+    imgData.append("image", files[i]);
+  }
+
+  try {
+    const response = await fetch(`http://localhost:4000/todos/upload/${curriculumId}`, {
+      method: "POST",
+      body: imgData,
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      alert("Imagen(es) cargada(s) con éxito.");
+      location.reload(); // Recargar para mostrar las imágenes nuevas
+    } else {
+      const errorData = await response.json();
+      alert(`Error: ${errorData.message}`);
+    }
+  } catch (error) {
+    alert("Error al cargar imagen(es).");
+    console.error("Error:", error);
+  }
+});
 
   // Botón de Enviar
   const submitButton = document.createElement("button");

@@ -19,9 +19,8 @@ export async function Header() {
 
   $header.innerHTML = `
     <img src="/unicityLogo.png" alt="Logo" class="h-14 mb-2" />
-    <input type="text" id="search-input" placeholder="Buscar oficio..." class="w-1/2 p-2 rounded-full border-none text-lg shadow-md bg-white text-black font-bold"/>
-    <button id="search-button" class="bg-blue-600 px-4 py-2 rounded-full text-white">Buscar</button>
-    <select id="filter-select" class="p-2 rounded-full border-none text-black shadow-md bg-white">
+    <input type="text" placeholder="Buscar..." class="w-1/2 p-2 rounded-full border-none text-lg shadow-md" />
+    <select class="p-2 rounded-full border-none text-black shadow-md bg-white">
       <option value="" disabled selected>Filtrar</option>
       <option value="Electricidad">Electricidad</option>
       <option value="Carpintería">Carpintería</option>

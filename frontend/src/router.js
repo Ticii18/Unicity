@@ -1,6 +1,5 @@
 import { loginPage } from "./pages/loginPage.js";
 import { homePage } from "./pages/homePage.js";
-import { todosPage } from "./pages/todosPage.js";
 import { curriculumPage } from "./pages/addJob.js"; // Asegúrate de que el nombre del archivo sea correcto
 import { registerPage } from "./pages/registerUser.js";
 import { validateSession } from "./helpers/validateSession.js";
@@ -36,9 +35,6 @@ export async function router(path, app) {
       break;
     case "/login":
       page = await loginPage(); 
-      break;
-    case "/todos":
-      page = await todosPage(); 
       break;
     case "/todos/add":
       page = await curriculumPage(); 
