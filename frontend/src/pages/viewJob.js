@@ -29,31 +29,34 @@ export const viewPage = async () => {
     return container;
   }
 
-
   // NUEVOOOOOO
   const getProfessionName = async (id) => {
     try {
-      const response = await fetch(`http://localhost:4000/professions/trabajos/${id}`);
+      const response = await fetch(
+        `http://localhost:4000/professions/trabajos/${id}`
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
       const profession = await response.json(); // Asegúrate de que recibes el objeto correcto
-      return profession.profession || 'Profesión no especificada'; // Devuelve el nombre de la profesión
+      return profession.profession || "Profesión no especificada"; // Devuelve el nombre de la profesión
     } catch (error) {
       console.error("Error al obtener la profesión:", error);
-      return 'Profesión no especificada'; // Valor por defecto en caso de error
+      return "Profesión no especificada"; // Valor por defecto en caso de error
     }
   };
   // NUEVOOOOO
 
-
   // Obtener los datos del currículum de la base de datos
   let curriculumData = null;
   try {
-    const response = await fetch(`http://localhost:4000/todos/${curriculumId}`, {
-      method: "GET",
-      credentials: "include",
-    });
+    const response = await fetch(
+      `http://localhost:4000/todos/${curriculumId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Error al obtener el currículum: ${response.statusText}`);
@@ -68,7 +71,14 @@ export const viewPage = async () => {
 
   // Crear el formulario para mostrar los datos del currículum
   const form = document.createElement("form");
-  form.classList.add("max-w-4xl", "mx-auto", "p-6", "bg-white", "rounded-lg", "shadow-lg");
+  form.classList.add(
+    "max-w-4xl",
+    "mx-auto",
+    "p-6",
+    "bg-white",
+    "rounded-lg",
+    "shadow-lg"
+  );
   form.id = "curriculumForm";
 
   // Encabezado
@@ -86,30 +96,37 @@ export const viewPage = async () => {
 
   // Obtener los datos de la foto de perfil
   const { profilePhoto } = curriculumData;
-// console.log(curriculumData.profilePhoto);
+  // console.log(curriculumData.profilePhoto);
   // Intentar construir la fuente de la imagen
   try {
     const imageData = profilePhoto?.data?.data || []; // Usar un array vacío como fallback
-    const contentType = profilePhoto?.contentType || 'image/jpeg'; // Tipo de contenido por defecto
+    const contentType = profilePhoto?.contentType || "image/jpeg"; // Tipo de contenido por defecto
 
     // Crear la fuente de la imagen solo si imageData es un array
     const base64 = Array.isArray(imageData)
       ? btoa(String.fromCharCode(...new Uint8Array(imageData)))
-      : 'placeholder.jpg'; // Si no es un array, se usará la imagen de marcador de posición
+      : "placeholder.jpg"; // Si no es un array, se usará la imagen de marcador de posición
 
     fotoImg.src = `data:${contentType};base64,${base64}`;
   } catch (e) {
-    fotoImg.src = 'placeholder.jpg'; // Si hay un error, usar imagen de marcador de posición
+    fotoImg.src = "placeholder.jpg"; // Si hay un error, usar imagen de marcador de posición
   }
 
   // Configuración de la imagen
-  fotoImg.alt = curriculumData.name || 'Usuario';
-  fotoImg.classList.add("w-32", "h-32", "object-cover", "mx-auto", "mb-4", "rounded-full");
+  fotoImg.alt = curriculumData.name || "Usuario";
+  fotoImg.classList.add(
+    "w-32",
+    "h-32",
+    "object-cover",
+    "mx-auto",
+    "mb-4",
+    "rounded-full"
+  );
 
   // Manejar el error de carga de la imagen
   fotoImg.onerror = function () {
     this.onerror = null; // Evitar bucles infinitos
-    this.src = 'placeholder.jpg'; // Usar imagen de marcador de posición
+    this.src = "placeholder.jpg"; // Usar imagen de marcador de posición
   };
 
   const nombre = document.createElement("h1");
@@ -149,7 +166,13 @@ export const viewPage = async () => {
   personalInfoTitle.textContent = "Información Personal";
   personalInfoSection.appendChild(personalInfoTitle);
 
-  const addInputField = (labelText, value, name, type = "text", isEditable = true) => {
+  const addInputField = (
+    labelText,
+    value,
+    name,
+    type = "text",
+    isEditable = true
+  ) => {
     const div = document.createElement("div");
     div.classList.add("mt-4");
 
@@ -184,17 +207,56 @@ export const viewPage = async () => {
     return div;
   };
 
-  personalInfoSection.appendChild(addInputField("Correo:", curriculumData.email || "", "correo", "email", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("Teléfono:", curriculumData.phone || "", "telefono", "tel", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("LinkedIn:", curriculumData.linkedin || "", "linkedin", "text", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("Sitio web:", curriculumData.website || "", "sitioWeb", "url", loggedInUserId === curriculumData.userId));
+  personalInfoSection.appendChild(
+    addInputField(
+      "Correo:",
+      curriculumData.email || "",
+      "correo",
+      "email",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "Teléfono:",
+      curriculumData.phone || "",
+      "telefono",
+      "tel",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "LinkedIn:",
+      curriculumData.linkedin || "",
+      "linkedin",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "Sitio web:",
+      curriculumData.website || "",
+      "sitioWeb",
+      "url",
+      loggedInUserId === curriculumData.userId
+    )
+  );
   form.appendChild(personalInfoSection);
 
   // Crear la sección de Experiencia Profesional
   const experienceSection = document.createElement("section"); // Crea un nuevo elemento de sección
-  experienceSection.classList.add( // Agrega clases CSS para estilizar la sección
-    "bg-white", "shadow-lg", "rounded-lg", "p-6", "mt-6", "mx-4",
-    "md:mx-auto", "max-w-4xl"
+  experienceSection.classList.add(
+    // Agrega clases CSS para estilizar la sección
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
   );
 
   // Crear el título para la sección de experiencia
@@ -204,21 +266,35 @@ export const viewPage = async () => {
   experienceSection.appendChild(experienceTitle); // Agrega el título a la sección de experiencia
 
   // Función para crear campos de experiencia
-  const createExperienceFields = (experience, index = '') => {
+  const createExperienceFields = (experience, index = "") => {
     // Define los campos que se crearán para cada experiencia
     const fields = [
-      { label: `Empresa${index}:`, value: experience.company, name: `empresa${index}` },
-      { label: `Duración${index}:`, value: experience.duration, name: `duracion${index}` },
-      { label: "Descripción del Puesto:", value: experience.jobDescription, name: `jobDescription${index}` }
+      {
+        label: `Empresa${index}:`,
+        value: experience.company,
+        name: `empresa${index}`,
+      },
+      {
+        label: `Duración${index}:`,
+        value: experience.duration,
+        name: `duracion${index}`,
+      },
+      {
+        label: "Descripción del Puesto:",
+        value: experience.jobDescription,
+        name: `jobDescription${index}`,
+      },
     ];
 
     const container = document.createElement("div"); // Crea un contenedor para los campos
     container.classList.add("mb-6", "border-b", "pb-4"); // Agrega clases para el estilo del contenedor
 
     // Recorre cada campo y crea su respectivo elemento de entrada
-    fields.forEach(field => {
-      container.appendChild( // Agrega cada campo al contenedor
-        addInputField( // Llama a la función para crear el campo de entrada
+    fields.forEach((field) => {
+      container.appendChild(
+        // Agrega cada campo al contenedor
+        addInputField(
+          // Llama a la función para crear el campo de entrada
           field.label, // Etiqueta del campo
           field.value || "", // Valor inicial (vacío si no hay valor)
           field.name, // Nombre del campo
@@ -248,14 +324,16 @@ export const viewPage = async () => {
     // Crear sección para cada experiencia
     experiences.forEach((exp, index) => {
       // Llama a la función para crear campos de experiencia y los agrega a la sección
-      const expSection = createExperienceFields(exp, experiences.length > 1 ? ` ${index + 1}` : '');
+      const expSection = createExperienceFields(
+        exp,
+        experiences.length > 1 ? ` ${index + 1}` : ""
+      );
       experienceSection.appendChild(expSection); // Agrega la sección de experiencia creada
     });
   }
 
   // Finalmente, agrega la sección de experiencia al formulario
   form.appendChild(experienceSection);
-
 
   // Habilidades
   const skillsSection = document.createElement("section");
@@ -275,135 +353,159 @@ export const viewPage = async () => {
   skillsTitle.textContent = "Habilidades";
   skillsSection.appendChild(skillsTitle);
 
-  skillsSection.appendChild(addInputField("Habilidad 1:", curriculumData.skills?.[0] || "", "habilidad1", "text", loggedInUserId === curriculumData.userId));
+  skillsSection.appendChild(
+    addInputField(
+      "Habilidad 1:",
+      curriculumData.skills?.[0] || "",
+      "habilidad1",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
 
-  skillsSection.appendChild(addInputField("Habilidad 2:", curriculumData.skills?.[1] || "", "habilidad2", "text", loggedInUserId === curriculumData.userId));
+  skillsSection.appendChild(
+    addInputField(
+      "Habilidad 2:",
+      curriculumData.skills?.[1] || "",
+      "habilidad2",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
 
   form.appendChild(skillsSection);
-// Crear etiqueta para subir fotos de trabajos realizados
-const imageContainer = document.createElement("div");
-imageContainer.id = "imageContainer";
-imageContainer.classList.add("flex", "flex-col", "gap-4", "mt-4");
+  // Crear etiqueta para subir fotos de trabajos realizados
+  const imageContainer = document.createElement("div");
+  imageContainer.id = "imageContainer";
+  imageContainer.classList.add("flex", "flex-col", "gap-4", "mt-4");
 
+  const imgLabel = document.createElement("label");
+  imgLabel.setAttribute("for", "trabajos");
+  imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
+  imgLabel.textContent = "Subir foto:";
 
-const imgLabel = document.createElement("label");
-imgLabel.setAttribute("for", "trabajos");
-imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
-imgLabel.textContent = "Subir foto:";
+  // Crear input para seleccionar la imagen
+  const fotoInput = document.createElement("input");
+  fotoInput.type = "file";
+  fotoInput.id = "trabajos";
+  fotoInput.name = "image"; // Name debe coincidir con lo que espera multer en el backend
+  fotoInput.accept = "image/*"; // Aceptar solo imágenes
+  fotoInput.classList.add(
+    "block",
+    "mx-auto",
+    "p-2",
+    "border-2",
+    "border-gray-300",
+    "rounded-lg",
+    "bg-white",
+    "text-gray-600"
+  );
+  imageContainer.appendChild(imgLabel);
+  imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor
 
-// Crear input para seleccionar la imagen
-const fotoInput = document.createElement("input");
-fotoInput.type = "file";
-fotoInput.id = "trabajos";
-fotoInput.name = "image"; // Name debe coincidir con lo que espera multer en el backend
-fotoInput.accept = "image/*"; // Aceptar solo imágenes
-fotoInput.classList.add(
-  "block",
-  "mx-auto",
-  "p-2",
-  "border-2",
-  "border-gray-300",
-  "rounded-lg",
-  "bg-white",
-  "text-gray-600"
-);
-imageContainer.appendChild(imgLabel);
-imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor
+  // Crear contenedor para las fotos de trabajos realizados
+  const imgJobs = document.createElement("section");
+  imgJobs.classList.add(
+    "flex",
+    "flex-wrap",
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
+  );
 
-// Crear contenedor para las fotos de trabajos realizados
-const imgJobs = document.createElement("section");
-imgJobs.classList.add(
-"flex",        
-  "flex-wrap",  
-  "bg-white",
-  "shadow-lg",
-  "rounded-lg",
-  "p-6",
-  "mt-6",
-  "mx-4",
-  "md:mx-auto",
-  "max-w-4xl"
-);
+  // Mostrar las imágenes existentes
+  // Asegurarse de que 'images' sea un array válido
+  const { images } = curriculumData || { images: [] };
 
-// Mostrar las imágenes existentes
-// Asegurarse de que 'images' sea un array válido
-const { images } = curriculumData || { images: [] };
+  // Mostrar las imágenes existentes
+  images.forEach((image) => {
+    const imgElement = document.createElement("img");
+    const imageData = image.data?.data || [];
+    const contentType = image.contentType || "image/jpeg";
 
-// Mostrar las imágenes existentes
-images.forEach((image) => {
-  const imgElement = document.createElement("img");
-  const imageData = image.data?.data || [];
-  const contentType = image.contentType || 'image/jpeg';
+    // Crear un Blob para la imagen y obtener su URL
+    const blob = new Blob([new Uint8Array(imageData)], { type: contentType });
+    const imageUrl = URL.createObjectURL(blob);
 
-  // Crear un Blob para la imagen y obtener su URL
-  const blob = new Blob([new Uint8Array(imageData)], { type: contentType });
-  const imageUrl = URL.createObjectURL(blob);
+    imgElement.src = imageUrl;
+    imgElement.classList.add(
+      "w-32",
+      "h-32",
+      "object-cover",
+      "mx-5",
+      "mb-4",
+      "rounded"
+    );
 
-  imgElement.src = imageUrl;
-  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-5", "mb-4", "rounded");
+    // Agregar la imagen al contenedor
+    imgJobs.appendChild(imgElement);
+  });
 
-  // Agregar la imagen al contenedor
-  imgJobs.appendChild(imgElement);
-});
+  // Crear botón para subir imágenes
+  const sendImg = document.createElement("button");
+  sendImg.type = "submit";
+  sendImg.textContent = "Subir foto";
+  sendImg.classList.add(
+    "bg-blue-500",
+    "text-white",
+    "py-2",
+    "px-4",
+    "mt-4",
+    "rounded",
+    "hover:bg-blue-700",
+    "transition"
+  );
 
+  // Agregar el input y las imágenes al formulario o sección
+  imageContainer.appendChild(imgJobs);
+  imageContainer.appendChild(sendImg);
+  form.appendChild(imageContainer);
+  // Mostrar el botón solo si el usuario es el propietario del currículum
+  // Reemplazamos el addEventListener del botón de subir imágenes
+  sendImg.addEventListener("click", async (event) => {
+    event.preventDefault(); // Evitar que se recargue la página
 
-// Crear botón para subir imágenes
-const sendImg = document.createElement("button");
-sendImg.type = "submit";
-sendImg.textContent = "Subir foto";
-sendImg.classList.add(
-  "bg-blue-500",
-  "text-white",
-  "py-2",
-  "px-4",
-  "mt-4",
-  "rounded",
-  "hover:bg-blue-700",
-  "transition"
-);
-
-// Agregar el input y las imágenes al formulario o sección
-imageContainer.appendChild(imgJobs);
-imageContainer.appendChild(sendImg);
-form.appendChild (imageContainer);
-// Mostrar el botón solo si el usuario es el propietario del currículum
-// Reemplazamos el addEventListener del botón de subir imágenes
-sendImg.addEventListener("click", async (event) => {
-  event.preventDefault(); // Evitar que se recargue la página
-
-  // Verificar que el usuario sea el propietario
-  if (loggedInUserId !== curriculumData.userId) {
-    alert("No tienes permisos para subir imágenes.");
-    return;
-  }
-
-  const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
-  const files = fotoInput.files; // Obtener las imágenes seleccionadas
-
-  // Agregar cada imagen al FormData
-  for (let i = 0; i < files.length; i++) {
-    imgData.append("image", files[i]);
-  }
-
-  try {
-    const response = await fetch(`http://localhost:4000/todos/upload/${curriculumId}`, {
-      method: "POST",
-      body: imgData,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      alert("Imagen(es) cargada(s) con éxito.");
-      location.reload(); // Recargar para mostrar las imágenes nuevas
-    } else {
-      const errorData = await response.json();
-      alert(`Error: ${errorData.message}`);
+    // Verificar que el usuario sea el propietario
+    if (loggedInUserId !== curriculumData.userId) {
+      alert("No tienes permisos para subir imágenes.");
+      return;
     }
-  } catch (error) {
-    alert("Error al cargar imagen(es).");
-    console.error("Error:", error);
-  }
-});
+
+    const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
+    const files = fotoInput.files; // Obtener las imágenes seleccionadas
+
+    // Agregar cada imagen al FormData
+    for (let i = 0; i < files.length; i++) {
+      imgData.append("image", files[i]);
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/todos/upload/${curriculumId}`,
+        {
+          method: "POST",
+          body: imgData,
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        alert("Imagen(es) cargada(s) con éxito.");
+        location.reload(); // Recargar para mostrar las imágenes nuevas
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message}`);
+      }
+    } catch (error) {
+      alert("Error al cargar imagen(es).");
+      console.error("Error:", error);
+    }
+  });
 
   // Botón de Enviar
   const submitButton = document.createElement("button");
@@ -440,11 +542,14 @@ sendImg.addEventListener("click", async (event) => {
     const formData = new FormData(form); // Crear un FormData para enviar archivos
 
     try {
-      const response = await fetch(`http://localhost:4000/todos/update/${curriculumId}`, {
-        method: "PUT",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:4000/todos/update/${curriculumId}`,
+        {
+          method: "PUT",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         alert("Currículum actualizado con éxito.");
