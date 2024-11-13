@@ -105,7 +105,7 @@ export async function homePage() {
         }
 
         return `
-        <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${
+        <div class="bg-white rounded-lg shadow-md shadow-gray-400 w-72 m-5 text-center p-5 transition-all duration-500 transform hover:-translate-y-3 hover:shadow-2xl hover:shadow-gray-600 job-element" data-job-id="${
           Curriculum._id
         }">
           ${

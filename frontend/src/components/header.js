@@ -32,14 +32,11 @@ export async function Header() {
 
   const handleSearch = async (query, professionId) => {
     try {
-      // Construir la URL base
       let url = new URL("http://localhost:4000/search/buscar");
       let params = new URLSearchParams();
 
-      // Agregar parámetros solo si tienen valor
       if (query) params.append("query", query);
       if (professionId) {
-        // Encontrar la profesión seleccionada para enviar su nombre
         const selectedProfession = professions.find(
           (p) => p._id === professionId
         );
@@ -48,13 +45,10 @@ export async function Header() {
         }
       }
 
-      // Añadir los parámetros a la URL
       url.search = params.toString();
-
       const response = await fetch(url);
       const results = await response.json();
 
-      // Dispatch del evento con los resultados
       const searchEvent = new CustomEvent("searchResults", {
         detail: {
           results,
@@ -79,7 +73,7 @@ export async function Header() {
     .join("");
 
   $header.innerHTML = `
-    <img src="/unicityLogo.png" alt="Logo" class="h-14 mb-2" />
+    <span class="text-white font-bold text-3xl hover:text-4xl transition duration-300 cursor-pointer">Unicity</span>
     <div class="flex items-center justify-between w-1/2 h-1/3">
       <input 
         type="text" 
@@ -89,7 +83,7 @@ export async function Header() {
       >
       <select 
         id="professionSelect" 
-        class="ml-4 p-2 rounded-full border-none text-black shadow-md bg-white"
+        class="ml-4 p-2 rounded-full border-none text-black shadow-md bg-white hover:bg-gray-200 transition duration-300"
       >
         <option value="">Todos los oficios</option>
         ${professionsOptions}
@@ -111,7 +105,7 @@ export async function Header() {
           </button>
         `
           : `
-          <button id="login" class="bg-green-500 px-4 py-2 rounded-full text-white">
+          <button id="login" class="bg-white text-black px-4 py-2 rounded-full hover:bg-gray-200 transition duration-300">
             Iniciar Sesión
           </button>
         `
@@ -123,7 +117,6 @@ export async function Header() {
   const searchInput = $header.querySelector("#searchInput");
   const professionSelect = $header.querySelector("#professionSelect");
 
-  // Función para manejar cambios en cualquier filtro
   const handleFilterChange = () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
@@ -131,7 +124,6 @@ export async function Header() {
     }, 300);
   };
 
-  // Event listeners para ambos filtros
   searchInput.addEventListener("input", handleFilterChange);
   professionSelect.addEventListener("change", handleFilterChange);
 
