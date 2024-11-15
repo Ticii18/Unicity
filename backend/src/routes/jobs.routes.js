@@ -8,7 +8,7 @@ import {
   uploadJob
 } from "../controllers/jobs.controllers.js";
 import authMiddleware from "../middlewares/validar-jwt.js";
-import upload from "../helpers/multer.js";
+import { uploadJobMulter, uploadProfile } from "../helpers/multer.js";
 
 const jobsRoutes = Router();
 
@@ -19,12 +19,12 @@ jobsRoutes.get("/jobs", getAllCurriculums);
 jobsRoutes.get("/:id", getCurriculumById);
 
 // Ruta para crear un nuevo curriculum (protegida)
-jobsRoutes.post("/add/:userId",authMiddleware, upload.single("image"), createCurriculum);
+jobsRoutes.post("/add/:userId",authMiddleware, uploadProfile.single("profilePhoto"), createCurriculum);
 
 // Ruta para actualizar un curriculum (protegida)
-jobsRoutes.put("/update/:id",authMiddleware, upload.single("image"), updateCurriculum);
+jobsRoutes.put("/update/:id",authMiddleware, uploadProfile.single("image"), updateCurriculum);
 
-jobsRoutes.post("/upload/:id",authMiddleware, upload.array("image",10), uploadJob);
+jobsRoutes.post("/upload/:id",authMiddleware, uploadJobMulter.array("jobName",10), uploadJob);
 
 // Ruta para eliminar un curriculum (protegida)
 jobsRoutes.delete("/delete/:curriculumId",authMiddleware, deleteCurriculum);

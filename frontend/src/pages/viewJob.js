@@ -82,25 +82,9 @@ export const viewPage = async () => {
   fotoLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
   fotoLabel.textContent = "Foto de Perfil:";
 
-  const fotoImg = document.createElement("img");
-
-  // Obtener los datos de la foto de perfil
-  const { profilePhoto } = curriculumData;
-// console.log(curriculumData.profilePhoto);
-  // Intentar construir la fuente de la imagen
-  try {
-    const imageData = profilePhoto?.data?.data || []; // Usar un array vacío como fallback
-    const contentType = profilePhoto?.contentType || 'image/jpeg'; // Tipo de contenido por defecto
-
-    // Crear la fuente de la imagen solo si imageData es un array
-    const base64 = Array.isArray(imageData)
-      ? btoa(String.fromCharCode(...new Uint8Array(imageData)))
-      : 'placeholder.jpg'; // Si no es un array, se usará la imagen de marcador de posición
-
-    fotoImg.src = `data:${contentType};base64,${base64}`;
-  } catch (e) {
-    fotoImg.src = 'placeholder.jpg'; // Si hay un error, usar imagen de marcador de posición
-  }
+// Crear imagen del perfil con la URL desde Cloudinary
+const fotoImg = document.createElement("img");
+fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
 
   // Configuración de la imagen
   fotoImg.alt = curriculumData.name || 'Usuario';
@@ -295,7 +279,7 @@ imgLabel.textContent = "Subir foto:";
 const fotoInput = document.createElement("input");
 fotoInput.type = "file";
 fotoInput.id = "trabajos";
-fotoInput.name = "image"; // Name debe coincidir con lo que espera multer en el backend
+fotoInput.name = "jobName"; // Name debe coincidir con lo que espera multer en el backend
 fotoInput.accept = "image/*"; // Aceptar solo imágenes
 fotoInput.classList.add(
   "block",
@@ -308,7 +292,11 @@ fotoInput.classList.add(
   "text-gray-600"
 );
 imageContainer.appendChild(imgLabel);
-imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor
+
+if (loggedInUserId === curriculumData.userId) {
+  imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor solo el usuario está logueado
+}
+
 
 // Crear contenedor para las fotos de trabajos realizados
 const imgJobs = document.createElement("section");
@@ -332,20 +320,16 @@ const { images } = curriculumData || { images: [] };
 // Mostrar las imágenes existentes
 images.forEach((image) => {
   const imgElement = document.createElement("img");
-  const imageData = image.data?.data || [];
-  const contentType = image.contentType || 'image/jpeg';
-
-  // Crear un Blob para la imagen y obtener su URL
-  const blob = new Blob([new Uint8Array(imageData)], { type: contentType });
-  const imageUrl = URL.createObjectURL(blob);
-
-  imgElement.src = imageUrl;
+  
+  // Usa directamente la URL de la imagen en Cloudinary
+  imgElement.src = image.url;
   imgElement.classList.add("w-32", "h-32", "object-cover", "mx-5", "mb-4", "rounded");
 
   // Agregar la imagen al contenedor
   imgJobs.appendChild(imgElement);
 });
-
+const spinnerSVG = `
+  <p>Cargando...</p>`;
 
 // Crear botón para subir imágenes
 const sendImg = document.createElement("button");
@@ -359,15 +343,20 @@ sendImg.classList.add(
   "mt-4",
   "rounded",
   "hover:bg-blue-700",
-  "transition"
+  "transition",
+  "disabled:bg-red-600"
 );
 
 // Agregar el input y las imágenes al formulario o sección
 imageContainer.appendChild(imgJobs);
-imageContainer.appendChild(sendImg);
+
+if (loggedInUserId === curriculumData.userId) {
+  imageContainer.appendChild(sendImg); // Solo agregar el botón si el usuario es el propietario
+}
+
 form.appendChild (imageContainer);
+
 // Mostrar el botón solo si el usuario es el propietario del currículum
-// Reemplazamos el addEventListener del botón de subir imágenes
 sendImg.addEventListener("click", async (event) => {
   event.preventDefault(); // Evitar que se recargue la página
 
@@ -382,19 +371,22 @@ sendImg.addEventListener("click", async (event) => {
 
   // Agregar cada imagen al FormData
   for (let i = 0; i < files.length; i++) {
-    imgData.append("image", files[i]);
+    imgData.append("jobName", files[i]);
   }
-
+  // Deshabilitar el botón y mostrar el spinner
+  sendImg.setAttribute("disabled", true);
+  sendImg.innerHTML = spinnerSVG; // Usar el spinner de Bootstrap o Tailwind
   try {
+    // sendImg.setAttribute("disabled",true)
+
     const response = await fetch(`http://localhost:4000/todos/upload/${curriculumId}`, {
       method: "POST",
       body: imgData,
       credentials: "include",
     });
-
     if (response.ok) {
-      alert("Imagen(es) cargada(s) con éxito.");
       location.reload(); // Recargar para mostrar las imágenes nuevas
+      
     } else {
       const errorData = await response.json();
       alert(`Error: ${errorData.message}`);
@@ -402,7 +394,11 @@ sendImg.addEventListener("click", async (event) => {
   } catch (error) {
     alert("Error al cargar imagen(es).");
     console.error("Error:", error);
-  }
+  }finally {
+    // Restaurar el botón después de la operación
+    await sendImg.removeAttribute("disabled");
+    sendImg.textContent = "Subir foto"; // Restaurar el texto del botón
+  } 
 });
 
   // Botón de Enviar

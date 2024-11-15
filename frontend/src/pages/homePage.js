@@ -79,24 +79,16 @@ export async function homePage() {
   const renderCurriculums = async (curriculums, isSearch = false) => {
     const CurriculumHTML = await Promise.all(curriculums.map(async (Curriculum) => {
       let professionName;
-      
+  
       if (isSearch) {
         professionName = Curriculum.professionId.profession;
       } else {
         professionName = await getProfessionName(Curriculum.professionId);
       }
-
-      // Manejo más detallado de la foto del perfil
-      let imageUrl = 'placeholder.jpg';
-      if (Curriculum.profilePhoto && Curriculum.profilePhoto.data) {
-        // Verificar si los datos de la foto ya están en base64
-        const photoData = typeof Curriculum.profilePhoto.data === 'string' 
-          ? Curriculum.profilePhoto.data 
-          : Buffer.from(Curriculum.profilePhoto.data).toString('base64');
-          
-        imageUrl = `data:${Curriculum.profilePhoto.contentType};base64,${photoData}`;
-      }
-
+  
+      // Manejo de la foto del perfil usando la URL de Cloudinary
+      const imageUrl = Curriculum.profilePhoto?.url || 'placeholder.jpg';
+  
       return `
         <div class="bg-white rounded-lg shadow-lg w-72 m-5 text-center p-5 transition-transform transform hover:-translate-y-2 hover:shadow-xl job-element" data-job-id="${Curriculum._id}">
           ${Curriculum.userId === currentUserId ?
@@ -113,7 +105,7 @@ export async function homePage() {
         </div>
       `;
     }));
-
+  
     $principal.innerHTML = `
       <section class="flex flex-wrap justify-around my-10">
         ${CurriculumHTML.length > 0 
@@ -121,10 +113,10 @@ export async function homePage() {
           : '<p class="text-center text-gray-500 w-full">No se encontraron resultados.</p>'}
       </section>
     `;
-
+  
     attachEventListeners($principal);
   };
-
+  
   // Carga inicial
   try {
     const response = await fetch('http://localhost:4000/todos/jobs', {

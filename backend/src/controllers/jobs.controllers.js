@@ -21,7 +21,7 @@ export const createCurriculum = async (req, res) => {
       const savedProfession = await newProfession.save();
       professionId = savedProfession._id; // Usar el ID de la nueva profesión
     }
-
+    
     // Crear el objeto con los datos del currículum
     const curriculumData = {
       userId: req.params.userId, 
@@ -38,11 +38,11 @@ export const createCurriculum = async (req, res) => {
       },
       skills: [req.body.habilidad1, req.body.habilidad2],
       profilePhoto: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
+        url: req.file.path, // URL de la imagen subida por Cloudinary
+        public_id: req.file.filename, // ID único de Cloudinary
       },
     };
-
+    console.log(curriculumData);
     // Guardar el currículum en la base de datos
     const newCurriculum = await Curriculum.create(curriculumData);
     res.status(201).json(newCurriculum); 
@@ -76,7 +76,6 @@ export const getCurriculumById = async (req, res) => {
 export const getAllCurriculums = async (req, res) => {
   try {
     const curriculums = await Curriculum.find(); 
-
     const curriculumsWithBase64Image = curriculums.map(curriculum => {
       const curriculumObject = curriculum.toObject();
 
@@ -96,7 +95,6 @@ export const getAllCurriculums = async (req, res) => {
 };
 
 // Subir una foto de oficio
-
 export const uploadJob = async (req, res) => {
   try {
     const curriculumId = req.params.id;
@@ -106,13 +104,13 @@ export const uploadJob = async (req, res) => {
       return res.status(400).json({ message: "No se subieron imágenes." });
     }
 
-    // Crear un array de imágenes para almacenar en la base de datos
+    // Crear un array de URLs de imágenes para almacenar en la base de datos
     const images = req.files.map((file) => ({
-      data: file.buffer,
+      url: file.path, // Cloudinary almacena la URL en file.path
       contentType: file.mimetype,
     }));
 
-    // Actualizar el currículum agregando las imágenes
+    // Actualizar el currículum agregando las URLs de las imágenes
     const updatedCurriculum = await Curriculum.findByIdAndUpdate(
       curriculumId,
       { $push: { images: { $each: images } } }, // Agregar imágenes al array existente
@@ -122,7 +120,7 @@ export const uploadJob = async (req, res) => {
     if (!updatedCurriculum) {
       return res.status(404).json({ message: "Currículum no encontrado" });
     }
-
+    
     res.status(200).json({
       message: "Imágenes subidas con éxito",
       curriculum: updatedCurriculum,
@@ -132,7 +130,6 @@ export const uploadJob = async (req, res) => {
     res.status(500).json({ message: "Error al subir las imágenes", error });
   }
 };
-
 
 // Actualizar un curriculum
 
@@ -161,8 +158,6 @@ export const updateCurriculum = async (req, res) => {
     if (!existingCurriculum) {
       return res.status(404).json({ message: 'Curriculum no encontrado' });
     }
-    console.log("aaaaaaa",req.file);
-
     // Si se subieron nuevas imágenes, agrégalas a las existentes
     if (req.file && req.file.length > 0) {
       const newImages = req.file.map((file) => ({

@@ -9,7 +9,7 @@ const CurriculumSchema = new mongoose.Schema({
   },
   professionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Profession', 
+    ref: 'Profession',
     required: [true, "El Oficio es obligatorio"]
   }, // Referencia a oficio
 
@@ -50,12 +50,20 @@ const CurriculumSchema = new mongoose.Schema({
     trim: true,
   }],
   profilePhoto: {
-    data: Buffer,
-    contentType: String,
+    url: {
+      type: String,
+      required: true, // Asegurarse de que siempre haya una URL
+    },
+    public_id: {
+      type: String,
+      required: true, // Guardar el ID de Cloudinary para futuras gestiones
+    },
   },
   images: [{
-    data: Buffer,
-    contentType: String,
+    url: {
+      type: String,
+      require: false,
+    },
   }],
   userId: {
     type: mongoose.Schema.Types.ObjectId,

@@ -40,7 +40,7 @@ export const curriculumPage = () => {
   const fotoInput = document.createElement("input");
   fotoInput.type = "file";
   fotoInput.id = "fotoPerfil";
-  fotoInput.name = "image"; // Cambiado el name a "image" para que coincida con multer
+  fotoInput.name = "profilePhoto"; // Cambiado el name a "image" para que coincida con multer
   fotoInput.accept = "image/*"; // Asegúrate de que solo se acepten imágenes
   fotoInput.classList.add(
     "block",
@@ -252,7 +252,8 @@ export const curriculumPage = () => {
   skillsSection.appendChild(addInputField("Habilidad 2:", "Escribe tu segunda habilidad", "habilidad2"));
 
   form.appendChild(skillsSection);
-
+  const spinnerSVG = `
+  <p>Cargando...</p>`;
   // Botón de Enviar
   const submitButton = document.createElement("button");
   submitButton.type = "submit";
@@ -276,20 +277,32 @@ export const curriculumPage = () => {
     event.preventDefault();
     const formData = new FormData(form); // Crear un FormData para enviar archivos
     const userId = localStorage.getItem("userId"); // Asegúrate de que esto sea correcto
-
-    const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      alert("Currículum guardado con éxito.");
-      window.location.pathname = "/"; // Redirigir a la página de vista de detalles
-      // Aquí puedes redirigir o actualizar la vista
-    } else {
-      const errorData = await response.json();
-      alert(`Error: ${errorData.message}`);
+    
+    submitButton.setAttribute("disabled", true);
+    submitButton.innerHTML = spinnerSVG; // Usar el spinner de Bootstrap o Tailwind
+  
+    try {
+      
+      const response = await fetch(`http://localhost:4000/todos/add/${userId}`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (response.ok) {
+        alert("Currículum guardado con éxito.");
+        // window.location.pathname = "/"; // Redirigir a la página de vista de detalles
+        // Aquí puedes redirigir o actualizar la vista
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message}`);
+      }
+    }catch (error) {
+      alert("Error al cargar imagen(es).");
+      console.error("Error:", error);
+    }finally {
+      // Restaurar el botón después de la operación
+      await submitButton.removeAttribute("disabled");
+      submitButton.textContent = "Subir foto"; // Restaurar el texto del botón
     }
   });
 
