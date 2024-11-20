@@ -19,7 +19,7 @@ const CurriculumSchema = new mongoose.Schema({
     trim: true,
   },
   phone: {
-    type: String,
+    type: Number,
     required: [true, "El número de teléfono es obligatorio."],
     trim: true,
   },
@@ -35,10 +35,12 @@ const CurriculumSchema = new mongoose.Schema({
     company: {
       type: String,
       trim: true,
+      required:true,
     },
     duration: {
       type: String,
       trim: true,
+      required:true,
     },
     jobDescription: {
       type: String,
@@ -47,7 +49,7 @@ const CurriculumSchema = new mongoose.Schema({
   }],
   companyData:[{
     phoneCompany:{
-      type: Number,
+      type: String,
       required:true,
       trim:true,
     },
@@ -64,6 +66,7 @@ const CurriculumSchema = new mongoose.Schema({
   skills: [{
     type: String,
     trim: true,
+    required:true,
   }],
   profilePhoto: {
     url: {
@@ -78,7 +81,7 @@ const CurriculumSchema = new mongoose.Schema({
   images: [{
     url: {
       type: String,
-      require: false,
+      required: false,
     },
   }],
   userId: {

@@ -286,6 +286,8 @@ export const viewPage = async () => {
     const container = document.createElement("div"); // Crea un contenedor para los campos
     container.classList.add("mb-6", "border-b", "pb-4"); // Agrega clases para el estilo del contenedor
 
+    
+
     // Recorre cada campo y crea su respectivo elemento de entrada
     fields.forEach((field) => {
       container.appendChild(
@@ -331,6 +333,77 @@ export const viewPage = async () => {
 
   // Finalmente, agrega la sección de experiencia al formulario
   form.appendChild(experienceSection);
+
+  
+  const companySection = document.createElement("section"); // Crea un nuevo elemento de sección
+  companySection.classList.add(
+    // Agrega clases CSS para estilizar la sección
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
+  );
+
+
+  const companyTitle = document.createElement("h2"); // Crea un nuevo elemento de encabezado
+  companyTitle.classList.add("text-2xl", "font-bold", "text-gray-700"); // Agrega clases CSS para estilizar el título
+  companyTitle.textContent = "Información de empresa"; // Establece el texto del título
+  companySection.appendChild(companyTitle); // Agrega el título a la sección de experiencia
+
+  // Función para crear campos de experiencia
+  const createCompanyFields = (company, index = "") => {
+    const fields = [
+      {
+        label: `Número de teléfono ${index}:`,
+        value: company.phoneCompany || "No especificado",
+        name: `phoneCompany${index}`,
+      },
+      {
+        label: `Correo de contacto ${index}:`,
+        value: company.emailCompany || "No especificado",
+        name: `emailCompany${index}`,
+      },
+      {
+        label: `Sitio web ${index}:`,
+        value: company.websiteCompany || "No especificado",
+        name: `websiteCompany${index}`,
+      },
+    ];
+  
+    const container = document.createElement("div");
+    container.classList.add("mb-6", "border-b", "pb-4");
+  
+    fields.forEach((field) => {
+      container.appendChild(
+        addInputField(field.label, field.value, field.name, "text",           loggedInUserId === curriculumData.userId // Permitir edición solo si el usuario está logueado
+        )
+      );
+    });
+  
+    return container;
+  };
+  
+  // Mostrar mensaje si no hay experiencias
+// Renderizar Información de Empresa
+if (!curriculumData.companyData || curriculumData.companyData.length === 0) {
+  const message = document.createElement("p");
+  message.textContent = "No hay información de empresa disponible.";
+  message.classList.add("text-gray-500", "mt-2");
+  companySection.appendChild(message);
+} else {
+  // Iterar sobre `companyData`
+  curriculumData.companyData.forEach((company, index) => {
+    const companyFields = createCompanyFields(company, index + 1); // Agregar índice
+    companySection.appendChild(companyFields);
+  });
+}
+  // Finalmente, agrega la sección de experiencia al formulario
+  form.appendChild(companySection);
+
 
   // Habilidades
   const skillsSection = document.createElement("section");
@@ -602,7 +675,8 @@ export const viewPage = async () => {
   commentsSection.appendChild(commentForm);
   form.appendChild(commentsSection);
 
-  commentForm.addEventListener("submit", async (event) => {
+  commentForm.addEventListener("keypress", async (event) => {
+    if (event.key === "Enter") {
     event.preventDefault();
     const comment = commentInput.value.trim();
     if (!comment) {
@@ -634,13 +708,18 @@ export const viewPage = async () => {
       }
 
       const newComment = await response.json();
+      if(response.ok){
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
       // Agrega el nuevo comentario al DOM
       console.log("Comentario creado:", newComment);
     } catch (error) {
       console.error("Error al crear comentario:", error);
       alert("Hubo un problema al enviar tu comentario.");
     }
-  });
+  }});
 
   const fetchAndRenderComments = async (curriculumId, commentsContainer) => {
     try {

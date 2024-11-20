@@ -290,7 +290,8 @@ export const curriculumPage = () => {
     "mt-4",
     "rounded",
     "hover:bg-blue-700",
-    "transition"
+    "transition",
+    "disabled:bg-red-500"
   );
 
   form.appendChild(submitButton);
