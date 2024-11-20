@@ -36,6 +36,11 @@ export const createCurriculum = async (req, res) => {
         duration: req.body.duracion,
         jobDescription: req.body.descripcionPuesto,
       },
+      companyData:{
+        phoneCompany: req.body.numCompany,
+        emailCompany: req.body.email,
+        websiteCompany: req.body.website,
+      },
       skills: [req.body.habilidad1, req.body.habilidad2],
       profilePhoto: {
         url: req.file.path, // URL de la imagen subida por Cloudinary

@@ -45,6 +45,22 @@ const CurriculumSchema = new mongoose.Schema({
       trim: true,
     },
   }],
+  companyData:[{
+    phoneCompany:{
+      type: Number,
+      required:true,
+      trim:true,
+    },
+    emailCompany:{
+      type: String,
+      required:true,
+      trim:true,
+    },
+    websiteCompany:{
+      type: String,
+      trim:true,
+    }
+  }],
   skills: [{
     type: String,
     trim: true,

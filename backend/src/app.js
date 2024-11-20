@@ -9,9 +9,14 @@ import { authRouter } from './routes/auth.routes.js';
 import { jobsRoutes } from './routes/jobs.routes.js';
 import { routerProfession } from './routes/ofices.routes.js';
 import searchRouter from './routes/search.routes.js';
+import routerComments from './routes/comments.routes.js';
 
+
+import http from 'http'
+import { Server as SocketServer } from 'socket.io';
 
 const app = express();
+const server = http.createServer(app);
 
 connectDB().then(() => {
   console.log('Conectado a MongoDB');
@@ -24,6 +29,31 @@ app.use(cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"]
 }));
+
+const io = new SocketServer(server, {
+  cors: {
+    origin: "http://localhost:5173", // Ajusta esto a la URL de tu frontend
+    methods: ["GET", "POST"]
+  }
+});
+
+
+io.on('connection', (socket) => {
+  console.log('Un cliente se ha conectado');
+
+  socket.on('joinRoom', (curriculumId) => {
+    socket.join(curriculumId);
+  });
+
+  socket.on('leaveRoom', (curriculumId) => {
+    socket.leave(curriculumId);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Un cliente se ha desconectado');
+  });
+});
+
 
 app.use(morgan('dev'));
 app.use(express.json());
@@ -39,7 +69,8 @@ app.use('/auth', authRouter);
 app.use('/todos',jobsRoutes);
 app.use('/professions',routerProfession)
 app.use("/search",searchRouter)
+app.use('/comments', routerComments);
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

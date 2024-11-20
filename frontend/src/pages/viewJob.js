@@ -1,8 +1,24 @@
+import { io } from "socket.io-client";
+
 export const viewPage = async () => {
   const container = document.createElement("div");
   container.classList.add("bg-gray-100");
+  let socket;
+  try {
+    socket = io("http://localhost:4000", {
+      transports: ["websocket", "polling"],
+    });
 
-  // Botón para volver al inicio
+    socket.on("connect", () => {
+      console.log("Conectado al servidor Socket.IO");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Error de conexión Socket.IO:", error);
+    });
+  } catch (error) {
+    console.error("Error al inicializar Socket.IO:", error);
+  }
   const homeButton = document.createElement("a");
   homeButton.href = "/";
   homeButton.classList.add(
@@ -20,40 +36,42 @@ export const viewPage = async () => {
   homeButton.textContent = "Volver al Inicio";
   container.appendChild(homeButton);
 
-  // Obtener el ID del currículum desde localStorage
   const curriculumId = localStorage.getItem("curriculumId");
-  const loggedInUserId = localStorage.getItem("userId"); // Obtener el userId del localStorage
+  const loggedInUserId = localStorage.getItem("userId");
 
   if (!curriculumId) {
     container.innerHTML = `<p class="text-red-500 text-center">Error: No se encontró el ID del currículum.</p>`;
     return container;
   }
 
-
   // NUEVOOOOOO
   const getProfessionName = async (id) => {
     try {
-      const response = await fetch(`http://localhost:4000/professions/trabajos/${id}`);
+      const response = await fetch(
+        `http://localhost:4000/professions/trabajos/${id}`
+      );
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
       const profession = await response.json(); // Asegúrate de que recibes el objeto correcto
-      return profession.profession || 'Profesión no especificada'; // Devuelve el nombre de la profesión
+      return profession.profession || "Profesión no especificada"; // Devuelve el nombre de la profesión
     } catch (error) {
       console.error("Error al obtener la profesión:", error);
-      return 'Profesión no especificada'; // Valor por defecto en caso de error
+      return "Profesión no especificada"; // Valor por defecto en caso de error
     }
   };
   // NUEVOOOOO
 
-
   // Obtener los datos del currículum de la base de datos
-  let curriculumData = null;
+  let curriculumData;
   try {
-    const response = await fetch(`http://localhost:4000/todos/${curriculumId}`, {
-      method: "GET",
-      credentials: "include",
-    });
+    const response = await fetch(
+      `http://localhost:4000/todos/${curriculumId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Error al obtener el currículum: ${response.statusText}`);
@@ -66,11 +84,16 @@ export const viewPage = async () => {
     return container;
   }
 
-  // Crear el formulario para mostrar los datos del currículum
   const form = document.createElement("form");
-  form.classList.add("max-w-4xl", "mx-auto", "p-6", "bg-white", "rounded-lg", "shadow-lg");
+  form.classList.add(
+    "max-w-4xl",
+    "mx-auto",
+    "p-6",
+    "bg-white",
+    "rounded-lg",
+    "shadow-lg"
+  );
   form.id = "curriculumForm";
-
   // Encabezado
   const header = document.createElement("header");
   header.classList.add("bg-blue-600", "text-white", "py-6");
@@ -82,18 +105,25 @@ export const viewPage = async () => {
   fotoLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
   fotoLabel.textContent = "Foto de Perfil:";
 
-// Crear imagen del perfil con la URL desde Cloudinary
-const fotoImg = document.createElement("img");
-fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
+  // Crear imagen del perfil con la URL desde Cloudinary
+  const fotoImg = document.createElement("img");
+  fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
 
   // Configuración de la imagen
-  fotoImg.alt = curriculumData.name || 'Usuario';
-  fotoImg.classList.add("w-32", "h-32", "object-cover", "mx-auto", "mb-4", "rounded-full");
+  fotoImg.alt = curriculumData.name || "Usuario";
+  fotoImg.classList.add(
+    "w-32",
+    "h-32",
+    "object-cover",
+    "mx-auto",
+    "mb-4",
+    "rounded-full"
+  );
 
   // Manejar el error de carga de la imagen
   fotoImg.onerror = function () {
     this.onerror = null; // Evitar bucles infinitos
-    this.src = 'placeholder.jpg'; // Usar imagen de marcador de posición
+    this.src = "placeholder.jpg"; // Usar imagen de marcador de posición
   };
 
   const nombre = document.createElement("h1");
@@ -133,7 +163,13 @@ fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
   personalInfoTitle.textContent = "Información Personal";
   personalInfoSection.appendChild(personalInfoTitle);
 
-  const addInputField = (labelText, value, name, type = "text", isEditable = true) => {
+  const addInputField = (
+    labelText,
+    value,
+    name,
+    type = "text",
+    isEditable = true
+  ) => {
     const div = document.createElement("div");
     div.classList.add("mt-4");
 
@@ -168,17 +204,56 @@ fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
     return div;
   };
 
-  personalInfoSection.appendChild(addInputField("Correo:", curriculumData.email || "", "correo", "email", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("Teléfono:", curriculumData.phone || "", "telefono", "tel", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("LinkedIn:", curriculumData.linkedin || "", "linkedin", "text", loggedInUserId === curriculumData.userId));
-  personalInfoSection.appendChild(addInputField("Sitio web:", curriculumData.website || "", "sitioWeb", "url", loggedInUserId === curriculumData.userId));
+  personalInfoSection.appendChild(
+    addInputField(
+      "Correo:",
+      curriculumData.email || "",
+      "correo",
+      "email",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "Teléfono:",
+      curriculumData.phone || "",
+      "telefono",
+      "tel",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "LinkedIn:",
+      curriculumData.linkedin || "",
+      "linkedin",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
+  personalInfoSection.appendChild(
+    addInputField(
+      "Sitio web:",
+      curriculumData.website || "",
+      "sitioWeb",
+      "url",
+      loggedInUserId === curriculumData.userId
+    )
+  );
   form.appendChild(personalInfoSection);
 
   // Crear la sección de Experiencia Profesional
   const experienceSection = document.createElement("section"); // Crea un nuevo elemento de sección
-  experienceSection.classList.add( // Agrega clases CSS para estilizar la sección
-    "bg-white", "shadow-lg", "rounded-lg", "p-6", "mt-6", "mx-4",
-    "md:mx-auto", "max-w-4xl"
+  experienceSection.classList.add(
+    // Agrega clases CSS para estilizar la sección
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
   );
 
   // Crear el título para la sección de experiencia
@@ -188,21 +263,35 @@ fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
   experienceSection.appendChild(experienceTitle); // Agrega el título a la sección de experiencia
 
   // Función para crear campos de experiencia
-  const createExperienceFields = (experience, index = '') => {
+  const createExperienceFields = (experience, index = "") => {
     // Define los campos que se crearán para cada experiencia
     const fields = [
-      { label: `Empresa${index}:`, value: experience.company, name: `empresa${index}` },
-      { label: `Duración${index}:`, value: experience.duration, name: `duracion${index}` },
-      { label: "Descripción del Puesto:", value: experience.jobDescription, name: `jobDescription${index}` }
+      {
+        label: `Empresa${index}:`,
+        value: experience.company,
+        name: `empresa${index}`,
+      },
+      {
+        label: `Duración${index}:`,
+        value: experience.duration,
+        name: `duracion${index}`,
+      },
+      {
+        label: "Descripción del Puesto:",
+        value: experience.jobDescription,
+        name: `jobDescription${index}`,
+      },
     ];
 
     const container = document.createElement("div"); // Crea un contenedor para los campos
     container.classList.add("mb-6", "border-b", "pb-4"); // Agrega clases para el estilo del contenedor
 
     // Recorre cada campo y crea su respectivo elemento de entrada
-    fields.forEach(field => {
-      container.appendChild( // Agrega cada campo al contenedor
-        addInputField( // Llama a la función para crear el campo de entrada
+    fields.forEach((field) => {
+      container.appendChild(
+        // Agrega cada campo al contenedor
+        addInputField(
+          // Llama a la función para crear el campo de entrada
           field.label, // Etiqueta del campo
           field.value || "", // Valor inicial (vacío si no hay valor)
           field.name, // Nombre del campo
@@ -232,14 +321,16 @@ fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
     // Crear sección para cada experiencia
     experiences.forEach((exp, index) => {
       // Llama a la función para crear campos de experiencia y los agrega a la sección
-      const expSection = createExperienceFields(exp, experiences.length > 1 ? ` ${index + 1}` : '');
+      const expSection = createExperienceFields(
+        exp,
+        experiences.length > 1 ? ` ${index + 1}` : ""
+      );
       experienceSection.appendChild(expSection); // Agrega la sección de experiencia creada
     });
   }
 
   // Finalmente, agrega la sección de experiencia al formulario
   form.appendChild(experienceSection);
-
 
   // Habilidades
   const skillsSection = document.createElement("section");
@@ -259,147 +350,170 @@ fotoImg.src = curriculumData.profilePhoto.url; // Usar la URL de Cloudinary
   skillsTitle.textContent = "Habilidades";
   skillsSection.appendChild(skillsTitle);
 
-  skillsSection.appendChild(addInputField("Habilidad 1:", curriculumData.skills?.[0] || "", "habilidad1", "text", loggedInUserId === curriculumData.userId));
+  skillsSection.appendChild(
+    addInputField(
+      "Habilidad 1:",
+      curriculumData.skills?.[0] || "",
+      "habilidad1",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
 
-  skillsSection.appendChild(addInputField("Habilidad 2:", curriculumData.skills?.[1] || "", "habilidad2", "text", loggedInUserId === curriculumData.userId));
+  skillsSection.appendChild(
+    addInputField(
+      "Habilidad 2:",
+      curriculumData.skills?.[1] || "",
+      "habilidad2",
+      "text",
+      loggedInUserId === curriculumData.userId
+    )
+  );
 
   form.appendChild(skillsSection);
-// Crear etiqueta para subir fotos de trabajos realizados
-const imageContainer = document.createElement("div");
-imageContainer.id = "imageContainer";
-imageContainer.classList.add("flex", "flex-col", "gap-4", "mt-4");
+  // Crear etiqueta para subir fotos de trabajos realizados
+  const imageContainer = document.createElement("div");
+  imageContainer.id = "imageContainer";
+  imageContainer.classList.add("flex", "flex-col", "gap-4", "mt-4");
 
+  const imgLabel = document.createElement("label");
+  imgLabel.setAttribute("for", "trabajos");
+  imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
+  imgLabel.textContent = "Subir foto:";
 
-const imgLabel = document.createElement("label");
-imgLabel.setAttribute("for", "trabajos");
-imgLabel.classList.add("block", "mb-2", "text-lg", "font-bold");
-imgLabel.textContent = "Subir foto:";
+  // Crear input para seleccionar la imagen
+  const fotoInput = document.createElement("input");
+  fotoInput.type = "file";
+  fotoInput.id = "trabajos";
+  fotoInput.name = "jobName"; // Name debe coincidir con lo que espera multer en el backend
+  fotoInput.accept = "image/*"; // Aceptar solo imágenes
+  fotoInput.classList.add(
+    "block",
+    "mx-auto",
+    "p-2",
+    "border-2",
+    "border-gray-300",
+    "rounded-lg",
+    "bg-white",
+    "text-gray-600"
+  );
+  imageContainer.appendChild(imgLabel);
 
-// Crear input para seleccionar la imagen
-const fotoInput = document.createElement("input");
-fotoInput.type = "file";
-fotoInput.id = "trabajos";
-fotoInput.name = "jobName"; // Name debe coincidir con lo que espera multer en el backend
-fotoInput.accept = "image/*"; // Aceptar solo imágenes
-fotoInput.classList.add(
-  "block",
-  "mx-auto",
-  "p-2",
-  "border-2",
-  "border-gray-300",
-  "rounded-lg",
-  "bg-white",
-  "text-gray-600"
-);
-imageContainer.appendChild(imgLabel);
+  if (loggedInUserId === curriculumData.userId) {
+    imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor solo el usuario está logueado
+  }
 
-if (loggedInUserId === curriculumData.userId) {
-  imageContainer.appendChild(fotoInput); // Agregar el input de archivo al contenedor solo el usuario está logueado
-}
+  // Crear contenedor para las fotos de trabajos realizados
+  const imgJobs = document.createElement("section");
+  imgJobs.classList.add(
+    "flex",
+    "flex-wrap",
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
+  );
 
+  // Mostrar las imágenes existentes
+  // Asegurarse de que 'images' sea un array válido
+  const { images } = curriculumData || { images: [] };
 
-// Crear contenedor para las fotos de trabajos realizados
-const imgJobs = document.createElement("section");
-imgJobs.classList.add(
-"flex",        
-  "flex-wrap",  
-  "bg-white",
-  "shadow-lg",
-  "rounded-lg",
-  "p-6",
-  "mt-6",
-  "mx-4",
-  "md:mx-auto",
-  "max-w-4xl"
-);
+  // Mostrar las imágenes existentes
+  images.forEach((image) => {
+    const imgElement = document.createElement("img");
 
-// Mostrar las imágenes existentes
-// Asegurarse de que 'images' sea un array válido
-const { images } = curriculumData || { images: [] };
+    // Usa directamente la URL de la imagen en Cloudinary
+    imgElement.src = image.url;
+    imgElement.classList.add(
+      "w-32",
+      "h-32",
+      "object-cover",
+      "mx-5",
+      "mb-4",
+      "rounded"
+    );
 
-// Mostrar las imágenes existentes
-images.forEach((image) => {
-  const imgElement = document.createElement("img");
-  
-  // Usa directamente la URL de la imagen en Cloudinary
-  imgElement.src = image.url;
-  imgElement.classList.add("w-32", "h-32", "object-cover", "mx-5", "mb-4", "rounded");
-
-  // Agregar la imagen al contenedor
-  imgJobs.appendChild(imgElement);
-});
-const spinnerSVG = `
+    // Agregar la imagen al contenedor
+    imgJobs.appendChild(imgElement);
+  });
+  const spinnerSVG = `
   <p>Cargando...</p>`;
 
-// Crear botón para subir imágenes
-const sendImg = document.createElement("button");
-sendImg.type = "submit";
-sendImg.textContent = "Subir foto";
-sendImg.classList.add(
-  "bg-blue-500",
-  "text-white",
-  "py-2",
-  "px-4",
-  "mt-4",
-  "rounded",
-  "hover:bg-blue-700",
-  "transition",
-  "disabled:bg-red-600"
-);
+  // Crear botón para subir imágenes
+  const sendImg = document.createElement("button");
+  sendImg.type = "submit";
+  sendImg.textContent = "Subir foto";
+  sendImg.classList.add(
+    "bg-blue-500",
+    "text-white",
+    "py-2",
+    "px-4",
+    "mt-4",
+    "rounded",
+    "hover:bg-blue-700",
+    "transition",
+    "disabled:bg-red-600"
+  );
 
-// Agregar el input y las imágenes al formulario o sección
-imageContainer.appendChild(imgJobs);
+  // Agregar el input y las imágenes al formulario o sección
+  imageContainer.appendChild(imgJobs);
 
-if (loggedInUserId === curriculumData.userId) {
-  imageContainer.appendChild(sendImg); // Solo agregar el botón si el usuario es el propietario
-}
-
-form.appendChild (imageContainer);
-
-// Mostrar el botón solo si el usuario es el propietario del currículum
-sendImg.addEventListener("click", async (event) => {
-  event.preventDefault(); // Evitar que se recargue la página
-
-  // Verificar que el usuario sea el propietario
-  if (loggedInUserId !== curriculumData.userId) {
-    alert("No tienes permisos para subir imágenes.");
-    return;
+  if (loggedInUserId === curriculumData.userId) {
+    imageContainer.appendChild(sendImg); // Solo agregar el botón si el usuario es el propietario
   }
 
-  const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
-  const files = fotoInput.files; // Obtener las imágenes seleccionadas
+  form.appendChild(imageContainer);
 
-  // Agregar cada imagen al FormData
-  for (let i = 0; i < files.length; i++) {
-    imgData.append("jobName", files[i]);
-  }
-  // Deshabilitar el botón y mostrar el spinner
-  sendImg.setAttribute("disabled", true);
-  sendImg.innerHTML = spinnerSVG; // Usar el spinner de Bootstrap o Tailwind
-  try {
-    // sendImg.setAttribute("disabled",true)
+  // Mostrar el botón solo si el usuario es el propietario del currículum
+  sendImg.addEventListener("click", async (event) => {
+    event.preventDefault(); // Evitar que se recargue la página
 
-    const response = await fetch(`http://localhost:4000/todos/upload/${curriculumId}`, {
-      method: "POST",
-      body: imgData,
-      credentials: "include",
-    });
-    if (response.ok) {
-      location.reload(); // Recargar para mostrar las imágenes nuevas
-      
-    } else {
-      const errorData = await response.json();
-      alert(`Error: ${errorData.message}`);
+    // Verificar que el usuario sea el propietario
+    if (loggedInUserId !== curriculumData.userId) {
+      alert("No tienes permisos para subir imágenes.");
+      return;
     }
-  } catch (error) {
-    alert("Error al cargar imagen(es).");
-    console.error("Error:", error);
-  }finally {
-    // Restaurar el botón después de la operación
-    await sendImg.removeAttribute("disabled");
-    sendImg.textContent = "Subir foto"; // Restaurar el texto del botón
-  } 
-});
+
+    const imgData = new FormData(); // Crear un nuevo FormData para las imágenes
+    const files = fotoInput.files; // Obtener las imágenes seleccionadas
+
+    // Agregar cada imagen al FormData
+    for (let i = 0; i < files.length; i++) {
+      imgData.append("jobName", files[i]);
+    }
+    // Deshabilitar el botón y mostrar el spinner
+    sendImg.setAttribute("disabled", true);
+    sendImg.innerHTML = spinnerSVG; // Usar el spinner de Bootstrap o Tailwind
+    try {
+      // sendImg.setAttribute("disabled",true)
+
+      const response = await fetch(
+        `http://localhost:4000/todos/upload/${curriculumId}`,
+        {
+          method: "POST",
+          body: imgData,
+          credentials: "include",
+        }
+      );
+      if (response.ok) {
+        location.reload(); // Recargar para mostrar las imágenes nuevas
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message}`);
+      }
+    } catch (error) {
+      alert("Error al cargar imagen(es).");
+      console.error("Error:", error);
+    } finally {
+      // Restaurar el botón después de la operación
+      await sendImg.removeAttribute("disabled");
+      sendImg.textContent = "Subir foto"; // Restaurar el texto del botón
+    }
+  });
 
   // Botón de Enviar
   const submitButton = document.createElement("button");
@@ -436,11 +550,14 @@ sendImg.addEventListener("click", async (event) => {
     const formData = new FormData(form); // Crear un FormData para enviar archivos
 
     try {
-      const response = await fetch(`http://localhost:4000/todos/update/${curriculumId}`, {
-        method: "PUT",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:4000/todos/update/${curriculumId}`,
+        {
+          method: "PUT",
+          body: formData,
+          credentials: "include",
+        }
+      );
 
       if (response.ok) {
         alert("Currículum actualizado con éxito.");
@@ -453,6 +570,151 @@ sendImg.addEventListener("click", async (event) => {
       alert("Error al actualizar el currículum. Por favor, intenta de nuevo.");
     }
   });
+
+  const commentsSection = document.createElement("section");
+  commentsSection.classList.add("mt-8");
+  const commentsTitle = document.createElement("h3");
+  commentsTitle.classList.add("text-2xl", "font-bold", "mb-4");
+  commentsTitle.textContent = "Comentarios";
+  commentsSection.appendChild(commentsTitle);
+
+  const commentsContainer = document.createElement("div");
+  commentsSection.appendChild(commentsContainer);
+
+  const commentForm = document.createElement("form");
+  commentForm.classList.add("mt-4");
+  const commentInput = document.createElement("textarea");
+  commentInput.classList.add("w-full", "p-2", "border", "rounded");
+  commentInput.placeholder = "Escribe un comentario...";
+  const submitButtonComment = document.createElement("button");
+  submitButtonComment.classList.add(
+    "mt-2",
+    "bg-blue-500",
+    "text-white",
+    "px-4",
+    "py-2",
+    "rounded"
+  );
+  submitButtonComment.textContent = "Enviar comentario";
+
+  commentForm.appendChild(commentInput);
+  commentForm.appendChild(submitButtonComment);
+  commentsSection.appendChild(commentForm);
+  form.appendChild(commentsSection);
+
+  commentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const comment = commentInput.value.trim();
+    if (!comment) {
+      alert("Por favor, escribe un comentario.");
+      return;
+    }
+
+    const body = {
+      curriculumId,
+      text: comment,
+    };
+
+    try {
+      const response = await fetch(
+        `http://localhost:4000/comments/commented/${curriculumId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
+      const newComment = await response.json();
+      // Agrega el nuevo comentario al DOM
+      console.log("Comentario creado:", newComment);
+    } catch (error) {
+      console.error("Error al crear comentario:", error);
+      alert("Hubo un problema al enviar tu comentario.");
+    }
+  });
+
+  const fetchAndRenderComments = async (curriculumId, commentsContainer) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/comments/viewComment/${curriculumId}`, // Ajusta al endpoint correcto
+        {
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Agrega el token JWT
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener comentarios: ${response.statusText}`);
+      }
+
+      const comments = await response.json();
+
+      // Limpiar el contenedor antes de renderizar los comentarios
+      commentsContainer.innerHTML = "";
+
+      if (comments.length === 0) {
+        const noComments = document.createElement("p");
+        noComments.textContent = "No hay comentarios aún.";
+        noComments.classList.add("text-gray-500", "text-center");
+        commentsContainer.appendChild(noComments);
+        return;
+      }
+
+      // Renderizar cada comentario
+      comments.forEach((comment) => {
+        const commentDiv = document.createElement("div");
+        commentDiv.classList.add(
+          "bg-white",
+          "shadow",
+          "rounded-lg",
+          "p-4",
+          "mb-4",
+          "border",
+          "border-gray-200"
+        );
+
+        const author = document.createElement("p");
+        author.textContent = `${comment.userName}`;
+        author.classList.add("font-bold", "text-blue-500");
+
+        const text = document.createElement("p");
+        text.textContent = comment.text;
+        text.classList.add("text-gray-700", "mt-2");
+
+        const date = document.createElement("small");
+        date.textContent = `Publicado el ${new Date(
+          comment.createdAt
+        ).toLocaleString()}`;
+        date.classList.add("text-gray-400", "text-sm", "mt-1");
+
+        commentDiv.appendChild(author);
+        commentDiv.appendChild(text);
+        commentDiv.appendChild(date);
+
+        commentsContainer.appendChild(commentDiv);
+      });
+    } catch (error) {
+      console.error("Error al obtener y renderizar comentarios:", error);
+      const errorMessage = document.createElement("p");
+      errorMessage.textContent = "Error al cargar comentarios.";
+      errorMessage.classList.add("text-red-500", "text-center");
+      commentsContainer.appendChild(errorMessage);
+    }
+  };
+
+  // Renderizar comentarios al cargar la página
+  await fetchAndRenderComments(curriculumId, commentsContainer);
 
   return container;
 };

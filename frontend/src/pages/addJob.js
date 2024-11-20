@@ -230,6 +230,30 @@ export const curriculumPage = () => {
 
   form.appendChild(experienceSection);
 
+  // Información de la Empresa
+  const companyInformation = document.createElement("section");
+  companyInformation.classList.add(
+    "bg-white",
+    "shadow-lg",
+    "rounded-lg",
+    "p-6",
+    "mt-6",
+    "mx-4",
+    "md:mx-auto",
+    "max-w-4xl"
+  );
+
+  const companyTitle = document.createElement("h2");
+  companyTitle.classList.add("text-2xl", "font-bold", "text-gray-700");
+  companyTitle.textContent = "Información de la empresa";
+  companyInformation.appendChild(companyTitle);
+
+  companyInformation.appendChild(addInputField("Número de Teléfono:", "Número de la empresa", "numCompany"));
+  companyInformation.appendChild(addInputField("Correo de contacto:", "correo electrónico de la empresa", "email"));
+  companyInformation.appendChild(addInputField("Sitio web:", "sitio web de la empresa", "website"));
+
+  form.appendChild(companyInformation);
+
   // Habilidades
   const skillsSection = document.createElement("section");
   skillsSection.classList.add(
@@ -290,7 +314,7 @@ export const curriculumPage = () => {
       });
       if (response.ok) {
         alert("Currículum guardado con éxito.");
-        // window.location.pathname = "/"; // Redirigir a la página de vista de detalles
+        window.location.pathname = "/"; // Redirigir a la página de vista de detalles
         // Aquí puedes redirigir o actualizar la vista
       } else {
         const errorData = await response.json();
@@ -302,7 +326,7 @@ export const curriculumPage = () => {
     }finally {
       // Restaurar el botón después de la operación
       await submitButton.removeAttribute("disabled");
-      submitButton.textContent = "Subir foto"; // Restaurar el texto del botón
+      submitButton.textContent = "Guardar currículum"; // Restaurar el texto del botón
     }
   });
 
